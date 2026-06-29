@@ -8,51 +8,50 @@ export const useDashboardData = () => {
   const [monthlyTarget, setMonthlyTarget] = useState<number>(2000);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const membersRef = useRef<Member[]>([]);
-  const runsRef = useRef<Run[]>([]);
-
-  membersRef.current = members;
-  runsRef.current = runs;
+  const isInitialLoadRef = useRef(true);
 
   const fetchData = useCallback(async () => {
     try {
-      const isInitial = membersRef.current.length === 0 && runsRef.current.length === 0;
-      if (isInitial) {
+      if (isInitialLoadRef.current) {
         setIsLoading(true);
       }
       
-      // Fetch settings
-      const { data: settingsData } = await supabase
-        .from('settings')
-        .select('*')
-        .eq('key', 'monthly_target')
-        .single()
-        .throwOnError();
-      
-      if (settingsData && settingsData.value) {
-        setMonthlyTarget(settingsData.value.distance || 2000);
+      const [settingsResult, membersResult, runsResult] = await Promise.all([
+        supabase
+          .from('settings')
+          .select('*')
+          .eq('key', 'monthly_target')
+          .maybeSingle(),
+        supabase
+          .from('members')
+          .select('*')
+          .order('name', { ascending: true })
+          .throwOnError(),
+        supabase
+          .from('runs')
+          .select('*')
+          .order('run_date', { ascending: false })
+          .throwOnError()
+      ]);
+
+      // Handle settings
+      if (settingsResult.error) {
+        console.warn('Error fetching settings:', settingsResult.error);
+      }
+      if (settingsResult.data && settingsResult.data.value) {
+        setMonthlyTarget(settingsResult.data.value.distance || 2000);
+      } else {
+        setMonthlyTarget(2000);
       }
 
-      // Fetch members
-      const { data: membersData } = await supabase
-        .from('members')
-        .select('*')
-        .order('name', { ascending: true })
-        .throwOnError();
-
-      if (membersData) {
-        setMembers(membersData as Member[]);
+      // Handle members
+      if (membersResult.data) {
+        setMembers(membersResult.data as Member[]);
       }
 
-      // Fetch runs
-      const { data: runsData } = await supabase
-        .from('runs')
-        .select('*')
-        .order('run_date', { ascending: false })
-        .throwOnError();
-
-      if (runsData) {
-        setRuns(runsData.map(r => ({
+      // Handle runs
+      if (runsResult.data) {
+        setRuns(runsResult.data.map(r => ({
           ...r,
           distance: Number(r.distance),
           duration: Number(r.duration)
@@ -62,6 +61,7 @@ export const useDashboardData = () => {
       console.error('Error fetching dashboard data:', err);
     } finally {
       setIsLoading(false);
+      isInitialLoadRef.current = false;
     }
   }, []);
 
