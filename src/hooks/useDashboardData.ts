@@ -30,12 +30,12 @@ export const useDashboardData = () => {
           .maybeSingle(),
         supabase
           .from('members')
-          .select('*')
+          .select('id, name, gender, nickname, created_at')
           .order('name', { ascending: true })
           .throwOnError(),
         supabase
           .from('runs')
-          .select('*')
+          .select('id, member_id, distance, duration, notes, run_date, type, created_at')
           .order('run_date', { ascending: false })
           .throwOnError()
       ]);
@@ -70,7 +70,8 @@ export const useDashboardData = () => {
         setRuns(runsResult.data.map(r => ({
           ...r,
           distance: Number(r.distance),
-          duration: Number(r.duration)
+          duration: Number(r.duration),
+          type: r.type || 'outdoor'
         })) as Run[]);
       }
     } catch (err) {
