@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Member, Run } from '../types';
 
@@ -8,16 +8,26 @@ export const useDashboardData = () => {
   const [monthlyTarget, setMonthlyTarget] = useState<number>(2000);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const membersRef = useRef<Member[]>([]);
+  const runsRef = useRef<Run[]>([]);
+
+  membersRef.current = members;
+  runsRef.current = runs;
+
   const fetchData = useCallback(async () => {
     try {
-      setIsLoading(true);
+      const isInitial = membersRef.current.length === 0 && runsRef.current.length === 0;
+      if (isInitial) {
+        setIsLoading(true);
+      }
       
       // Fetch settings
       const { data: settingsData } = await supabase
         .from('settings')
         .select('*')
         .eq('key', 'monthly_target')
-        .single();
+        .single()
+        .throwOnError();
       
       if (settingsData && settingsData.value) {
         setMonthlyTarget(settingsData.value.distance || 2000);
@@ -27,7 +37,8 @@ export const useDashboardData = () => {
       const { data: membersData } = await supabase
         .from('members')
         .select('*')
-        .order('name', { ascending: true });
+        .order('name', { ascending: true })
+        .throwOnError();
 
       if (membersData) {
         setMembers(membersData as Member[]);
@@ -37,7 +48,8 @@ export const useDashboardData = () => {
       const { data: runsData } = await supabase
         .from('runs')
         .select('*')
-        .order('run_date', { ascending: false });
+        .order('run_date', { ascending: false })
+        .throwOnError();
 
       if (runsData) {
         setRuns(runsData.map(r => ({
