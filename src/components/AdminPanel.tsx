@@ -331,8 +331,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               />
               <input
                 type="text"
-                maxLength={10}
-                placeholder="닉네임 (최대 10자)"
+                maxLength={6}
+                placeholder="닉네임 (최대 6자)"
                 value={memberNickname}
                 onChange={(e) => setMemberNickname(e.target.value)}
                 className="w-1/2 bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
@@ -400,11 +400,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   <div className="flex items-center gap-2 flex-1 max-w-[240px]">
                     <input
                       type="text"
-                      maxLength={10}
-                      placeholder="닉네임 입력 (최대 10자)"
+                      maxLength={6}
+                      placeholder="닉네임 입력 (최대 6자)"
                       value={getNicknameVal(m.id, m.nickname)}
                       onChange={(e) => handleNicknameChange(m.id, e.target.value)}
-                      className="w-full bg-brand-darkSurface border border-gray-850 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-brand-orange text-center"
+                      className="w-full bg-brand-darkSurface border border-gray-855 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-brand-orange text-center"
                     />
                     <button
                       type="button"

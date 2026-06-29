@@ -95,15 +95,15 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
                 >
                   {entry.nickname ? (
                     <div className="w-full min-w-0">
-                      <span className="text-xs font-black text-brand-orange block truncate w-full flex items-center justify-center gap-0.5">
+                      <span className="text-xs font-black text-brand-orange block whitespace-nowrap flex items-center justify-center gap-0.5">
                         {entry.nickname} {medalEmoji}
                       </span>
-                      <span className="text-[9px] text-gray-500 font-normal block truncate w-full">
+                      <span className="text-[9px] text-gray-500 font-normal block whitespace-nowrap">
                         ({entry.name})
                       </span>
                     </div>
                   ) : (
-                    <span className="text-xs font-black text-white block truncate w-full flex items-center justify-center gap-0.5">
+                    <span className="text-xs font-black text-white block whitespace-nowrap flex items-center justify-center gap-0.5">
                       {entry.name} {medalEmoji}
                     </span>
                   )}
@@ -142,7 +142,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
               placeholder="회원 검색..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-2 pl-9 text-xs focus:outline-none focus:border-brand-orange text-white"
+              className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-2 pl-9 text-base sm:text-xs focus:outline-none focus:border-brand-orange text-white"
             />
             <Search className="w-3.5 h-3.5 text-gray-500 absolute left-3 top-2.5" />
           </div>
