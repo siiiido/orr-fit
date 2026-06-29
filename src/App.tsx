@@ -7,10 +7,10 @@ import { RecentActivity } from './components/RecentActivity';
 import { AdminGate } from './components/AdminGate';
 import { AdminPanel } from './components/AdminPanel';
 import { supabase } from './lib/supabase';
-import type { LeaderboardEntry } from './types';
+import type { LeaderboardEntry, ChallengeTier } from './types';
 
 export default function App() {
-  const { members, runs, monthlyTarget, isLoading } = useDashboardData();
+  const { members, runs, monthlyTarget, monthlyChallenge, isLoading } = useDashboardData();
   const [isAdmin, setIsAdmin] = useState(false);
   const [showGate, setShowGate] = useState(false);
 
@@ -18,21 +18,12 @@ export default function App() {
   const totalDistance = runs.reduce((acc, r) => acc + r.distance, 0);
   const activeCount = members.length;
 
-  // Compute Weekly Challenge Completers (Distance >= 10km in current week)
-  const getWeeklyChallengeCount = () => {
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setHours(0, 0, 0, 0);
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    
-    const memberWeeklyDistances: Record<string, number> = {};
-    runs.forEach((r) => {
-      const runDate = new Date(r.run_date + 'T00:00:00');
-      if (runDate >= oneWeekAgo) {
-        memberWeeklyDistances[r.member_id] = (memberWeeklyDistances[r.member_id] || 0) + r.distance;
-      }
-    });
-
-    return Object.values(memberWeeklyDistances).filter(d => d >= 10).length;
+  // Mutator: Update Monthly Challenge Tiers
+  const handleUpdateChallenge = async (tiers: ChallengeTier[]) => {
+    await supabase
+      .from('settings')
+      .upsert([{ key: 'monthly_challenge', value: { tiers } }])
+      .throwOnError();
   };
 
   // Calculate Leaderboard entries sorted by total distance descending
@@ -160,10 +151,12 @@ export default function App() {
             members={members}
             runs={runs}
             monthlyTarget={monthlyTarget}
+            monthlyChallenge={monthlyChallenge}
             onAddMember={handleAddMember}
             onAddRun={handleAddRun}
             onDeleteRun={handleDeleteRun}
             onUpdateTarget={handleUpdateTarget}
+            onUpdateChallenge={handleUpdateChallenge}
           />
         )}
 
@@ -174,7 +167,9 @@ export default function App() {
             <GoalProgress
               currentDistance={totalDistance}
               targetDistance={monthlyTarget}
-              weeklyChallengeCompleteCount={getWeeklyChallengeCount()}
+              monthlyChallenge={monthlyChallenge}
+              members={members}
+              runs={runs}
             />
           </div>
 
