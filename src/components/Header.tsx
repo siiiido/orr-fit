@@ -25,7 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
             ORR FIT <span className="text-brand-orange">RUNNING</span>
           </h1>
           <p className="text-xs text-gray-400 font-semibold hidden md:block">
-            젬스톤피트니스 서면점 유산소 챌린지
+            멋짐피트니스 연지점 유산소 챌린지
           </p>
         </div>
       </div>
