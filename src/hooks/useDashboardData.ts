@@ -68,34 +68,22 @@ export const useDashboardData = () => {
   useEffect(() => {
     fetchData();
 
-    // Subscribe to members channel
-    const membersSubscription = supabase
-      .channel('public:members')
+    // Single channel subscribing to all three tables — reduces connections from 3→1 per user
+    const realtimeChannel = supabase
+      .channel('orr-fit-dashboard')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'members' }, () => {
         fetchData();
       })
-      .subscribe();
-
-    // Subscribe to runs channel
-    const runsSubscription = supabase
-      .channel('public:runs')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'runs' }, () => {
         fetchData();
       })
-      .subscribe();
-
-    // Subscribe to settings channel
-    const settingsSubscription = supabase
-      .channel('public:settings')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, () => {
         fetchData();
       })
       .subscribe();
 
     return () => {
-      supabase.removeChannel(membersSubscription);
-      supabase.removeChannel(runsSubscription);
-      supabase.removeChannel(settingsSubscription);
+      supabase.removeChannel(realtimeChannel);
     };
   }, [fetchData]);
 
