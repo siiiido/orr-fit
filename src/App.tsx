@@ -1,17 +1,133 @@
 import { useState } from 'react';
 import { useDashboardData } from './hooks/useDashboardData';
 import { Header } from './components/Header';
+import { GoalProgress } from './components/GoalProgress';
+import { Leaderboard } from './components/Leaderboard';
+import { RecentActivity } from './components/RecentActivity';
+import { AdminGate } from './components/AdminGate';
+import { AdminPanel } from './components/AdminPanel';
+import { supabase } from './lib/supabase';
+import type { LeaderboardEntry } from './types';
 
-function App() {
+export default function App() {
   const { members, runs, monthlyTarget, isLoading } = useDashboardData();
   const [isAdmin, setIsAdmin] = useState(false);
   const [showGate, setShowGate] = useState(false);
-  const [passcode, setPasscode] = useState('');
-  const [passcodeError, setPasscodeError] = useState('');
 
-  // Compute metrics
+  // Compute Global Metrics
   const totalDistance = runs.reduce((acc, r) => acc + r.distance, 0);
   const activeCount = members.length;
+
+  // Compute Weekly Challenge Completers (Distance >= 10km in current week)
+  const getWeeklyChallengeCount = () => {
+    // Basic implementation: find members with sum of distance in last 7 days >= 10
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    const memberWeeklyDistances: Record<string, number> = {};
+    runs.forEach((r) => {
+      const runDate = new Date(r.run_date);
+      if (runDate >= oneWeekAgo) {
+        memberWeeklyDistances[r.member_id] = (memberWeeklyDistances[r.member_id] || 0) + r.distance;
+      }
+    });
+
+    return Object.values(memberWeeklyDistances).filter(d => d >= 10).length;
+  };
+
+  // Calculate Leaderboard entries sorted by total distance descending
+  const getLeaderboardEntries = (): LeaderboardEntry[] => {
+    const memberMap: Record<string, {
+      totalDistance: number;
+      totalRuns: number;
+      totalDuration: number;
+      lastRunDate: string;
+    }> = {};
+
+    // Initialize all members with 0
+    members.forEach((m) => {
+      memberMap[m.id] = {
+        totalDistance: 0,
+        totalRuns: 0,
+        totalDuration: 0,
+        lastRunDate: '',
+      };
+    });
+
+    // Sum runs
+    runs.forEach((r) => {
+      if (!memberMap[r.member_id]) return; // Skip if member not found in list
+      const m = memberMap[r.member_id];
+      m.totalDistance += r.distance;
+      m.totalRuns += 1;
+      m.totalDuration += r.duration;
+      if (!m.lastRunDate || new Date(r.run_date) > new Date(m.lastRunDate)) {
+        m.lastRunDate = r.run_date;
+      }
+    });
+
+    const entries: LeaderboardEntry[] = members.map((m) => {
+      const data = memberMap[m.id];
+      
+      // Calculate average pace
+      let averagePace = `00'00"`;
+      if (data.totalDistance > 0) {
+        const totalMin = data.totalDuration / 60;
+        const paceDecimal = totalMin / data.totalDistance;
+        const mins = Math.floor(paceDecimal);
+        const secs = Math.round((paceDecimal - mins) * 60);
+        averagePace = `${mins}'${secs.toString().padStart(2, '0')}"`;
+      }
+
+      return {
+        memberId: m.id,
+        name: m.name,
+        gender: m.gender,
+        totalDistance: data.totalDistance,
+        totalRuns: data.totalRuns,
+        averagePace,
+        totalDuration: data.totalDuration,
+        lastRunDate: data.lastRunDate,
+      };
+    });
+
+    return entries.sort((a, b) => b.totalDistance - a.totalDistance);
+  };
+
+  // Mutator: Add Member
+  const handleAddMember = async (name: string, gender: 'M' | 'F') => {
+    await supabase
+      .from('members')
+      .insert([{ name, gender }]);
+  };
+
+  // Mutator: Add Run
+  const handleAddRun = async (
+    memberId: string,
+    distance: number,
+    duration: number,
+    notes: string,
+    date: string
+  ) => {
+    await supabase
+      .from('runs')
+      .insert([{ member_id: memberId, distance, duration, notes, run_date: date }]);
+  };
+
+  // Mutator: Delete Run
+  const handleDeleteRun = async (runId: string) => {
+    await supabase
+      .from('runs')
+      .delete()
+      .eq('id', runId);
+  };
+
+  // Mutator: Update Monthly Target
+  const handleUpdateTarget = async (newTarget: number) => {
+    await supabase
+      .from('settings')
+      .upsert([{ key: 'monthly_target', value: { distance: newTarget } }]);
+  };
 
   if (isLoading) {
     return (
@@ -24,6 +140,8 @@ function App() {
     );
   }
 
+  const leaderboardEntries = getLeaderboardEntries();
+
   return (
     <div className="min-h-screen bg-brand-darkBg pb-12 transition-all duration-300">
       <Header
@@ -34,114 +152,52 @@ function App() {
       />
 
       <main className="max-w-7xl mx-auto px-4 md:px-8 mt-6 md:mt-8 space-y-6">
-        {/* Admin panel placeholder if logged in */}
+        {/* Admin panel displays at the top if logged in */}
         {isAdmin && (
-          <div className="bg-brand-darkSurface border border-red-500/20 p-6 rounded-2xl">
-            <h3 className="text-lg font-bold text-red-500 mb-2">관리자 모드 활성화됨</h3>
-            <p className="text-xs text-gray-400">관리자 패널 컴포넌트가 구현되면 여기에 표시됩니다.</p>
-          </div>
+          <AdminPanel
+            members={members}
+            runs={runs}
+            monthlyTarget={monthlyTarget}
+            onAddMember={handleAddMember}
+            onAddRun={handleAddRun}
+            onDeleteRun={handleDeleteRun}
+            onUpdateTarget={handleUpdateTarget}
+          />
         )}
 
         {/* Three-Column Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Column 1: Stats & Target (Span 3) */}
-          <div className="lg:col-span-3 bg-brand-darkSurface border border-gray-800 p-6 rounded-2xl">
-            <h3 className="text-base font-bold text-white mb-2">월간 목표 & 진행도</h3>
-            <p className="text-xs text-gray-400">GoalProgress 컴포넌트가 위치할 곳입니다.</p>
-            <div className="mt-4 text-2xl font-black text-brand-orange">
-              {totalDistance.toFixed(1)} / {monthlyTarget} km
-            </div>
+          <div className="lg:col-span-3">
+            <GoalProgress
+              currentDistance={totalDistance}
+              targetDistance={monthlyTarget}
+              weeklyChallengeCompleteCount={getWeeklyChallengeCount()}
+            />
           </div>
 
           {/* Column 2: Hall of Fame & Leaderboard (Span 6) */}
-          <div className="lg:col-span-6 bg-brand-darkSurface border border-gray-800 p-6 rounded-2xl">
-            <h3 className="text-base font-bold text-white mb-2">명예의 전당 (리더보드)</h3>
-            <p className="text-xs text-gray-400">Leaderboard 컴포넌트가 위치할 곳입니다.</p>
-            <div className="mt-4 space-y-2">
-              {members.slice(0, 5).map((m, idx) => (
-                <div key={m.id} className="flex justify-between text-sm py-1 border-b border-gray-800/50">
-                  <span>{idx + 1}. {m.name}</span>
-                  <span className="font-bold text-white">{m.gender}</span>
-                </div>
-              ))}
-            </div>
+          <div className="lg:col-span-6">
+            <Leaderboard entries={leaderboardEntries} />
           </div>
 
           {/* Column 3: Recent Activity (Span 3) */}
-          <div className="lg:col-span-3 bg-brand-darkSurface border border-gray-800 p-6 rounded-2xl">
-            <h3 className="text-base font-bold text-white mb-2">최근 활동기록</h3>
-            <p className="text-xs text-gray-400">RecentActivity 컴포넌트가 위치할 곳입니다.</p>
-            <div className="mt-4 text-sm text-gray-400">
-              최근 러닝 기록 {runs.length}건이 동기화되었습니다.
-            </div>
+          <div className="lg:col-span-3">
+            <RecentActivity runs={runs} members={members} />
           </div>
         </div>
       </main>
 
-      {/* Password Gate Modal Overlay (Inline mockup for Task 4) */}
+      {/* Password Gates Modal overlay */}
       {showGate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-sm p-6 bg-brand-darkSurface border border-brand-orange/10 rounded-2xl shadow-xl">
-            <h3 className="text-lg font-bold text-white mb-2">관리자 인증</h3>
-            <p className="text-xs text-gray-400 mb-4">비밀번호를 입력하여 관리자 모드로 전환합니다.</p>
-            
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (passcode === '0000') {
-                  setIsAdmin(true);
-                  setShowGate(false);
-                  setPasscode('');
-                  setPasscodeError('');
-                } else {
-                  setPasscodeError('비밀번호가 올바르지 않습니다.');
-                  setPasscode('');
-                }
-              }}
-              className="space-y-4"
-            >
-              <div>
-                <input
-                  type="password"
-                  value={passcode}
-                  onChange={(e) => setPasscode(e.target.value)}
-                  placeholder="비밀번호 4자리"
-                  maxLength={4}
-                  className="w-full px-3 py-2 bg-brand-darkBg border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-brand-orange text-center tracking-widest text-lg font-bold"
-                  autoFocus
-                />
-                {passcodeError && (
-                  <p className="text-red-500 text-xs mt-2 text-center font-semibold">
-                    {passcodeError}
-                  </p>
-                )}
-              </div>
-              
-              <div className="flex justify-end gap-2">
-                <button 
-                  type="button"
-                  onClick={() => {
-                    setShowGate(false);
-                    setPasscode('');
-                    setPasscodeError('');
-                  }}
-                  className="px-4 py-2 text-xs font-semibold text-gray-400 hover:text-white transition"
-                >
-                  취소
-                </button>
-                <button 
-                  type="submit"
-                  className="px-4 py-2 text-xs font-semibold bg-brand-orange text-white rounded-lg hover:bg-brand-orange/95 transition"
-                >
-                  확인
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <AdminGate
+          onClose={() => setShowGate(false)}
+          onSuccess={() => {
+            setIsAdmin(true);
+            setShowGate(false);
+          }}
+        />
       )}
     </div>
   );
 }
-
-export default App;

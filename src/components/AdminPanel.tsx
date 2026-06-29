@@ -39,6 +39,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   // Target Setting State
   const [targetDistanceInput, setTargetDistanceInput] = useState(monthlyTarget.toString());
 
+  React.useEffect(() => {
+    setTargetDistanceInput(monthlyTarget.toString());
+  }, [monthlyTarget]);
+
   // Submit Log
   const handleRunSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
