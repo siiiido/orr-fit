@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Heart, Activity } from 'lucide-react';
+import React from 'react';
+import { Activity } from 'lucide-react';
 import type { Run, Member } from '../types';
 
 interface RecentActivityProps {
@@ -8,24 +8,6 @@ interface RecentActivityProps {
 }
 
 export const RecentActivity: React.FC<RecentActivityProps> = ({ runs, members }) => {
-  // Stores claps in local state. In real-world, this could be on the DB, but local-storage is fine for micro-reactions.
-  const [cheers, setCheers] = useState<Record<string, number>>(() => {
-    try {
-      return JSON.parse(localStorage.getItem('orr_fit_cheers') || '{}');
-    } catch {
-      return {};
-    }
-  });
-
-  const handleCheer = (runId: string) => {
-    const updated = {
-      ...cheers,
-      [runId]: (cheers[runId] || 0) + 1,
-    };
-    setCheers(updated);
-    localStorage.setItem('orr_fit_cheers', JSON.stringify(updated));
-  };
-
   const getMemberDisplayName = (memberId: string) => {
     const m = members.find((m) => m.id === memberId);
     if (!m) return '알 수 없는 회원';
@@ -109,14 +91,6 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ runs, members })
                     페이스
                   </div>
                 </div>
-
-                <button
-                  onClick={() => handleCheer(run.id)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-brand-orange/5 border border-brand-orange/10 text-brand-orange hover:bg-brand-orange/15 active:scale-95 transition-all"
-                >
-                  <Heart className="w-3.5 h-3.5 fill-brand-orange text-brand-orange" />
-                  응원 {cheers[run.id] || 0}
-                </button>
               </div>
             </div>
           ))
