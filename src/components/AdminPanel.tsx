@@ -7,8 +7,15 @@ interface AdminPanelProps {
   runs: Run[];
   monthlyTarget: number;
   monthlyChallenge: MonthlyChallenge | null;
-  onAddMember: (name: string, gender: 'M' | 'F') => Promise<void>;
-  onAddRun: (memberId: string, distance: number, duration: number, notes: string, date: string) => Promise<void>;
+  onAddMember: (name: string, gender: 'M' | 'F', nickname?: string) => Promise<void>;
+  onAddRun: (
+    memberId: string,
+    distance: number,
+    duration: number,
+    notes: string,
+    date: string,
+    type: 'outdoor' | 'treadmill' | 'stairmaster' | 'cycling'
+  ) => Promise<void>;
   onDeleteRun: (runId: string) => Promise<void>;
   onUpdateTarget: (target: number) => Promise<void>;
   onUpdateChallenge: (tiers: ChallengeTier[]) => Promise<void>;
@@ -35,10 +42,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [durationSec, setDurationSec] = useState('');
   const [runNotes, setRunNotes] = useState('');
   const [runDate, setRunDate] = useState(new Date().toISOString().substring(0, 10));
+  const [workoutType, setWorkoutType] = useState<'outdoor' | 'treadmill' | 'stairmaster' | 'cycling'>('outdoor');
 
   // New Member Form States
   const [memberName, setMemberName] = useState('');
   const [memberGender, setMemberGender] = useState<'M' | 'F'>('M');
+  const [memberNickname, setMemberNickname] = useState('');
 
   // Target Setting State
   const [targetDistanceInput, setTargetDistanceInput] = useState(monthlyTarget.toString());
@@ -58,13 +67,40 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   }, [monthlyChallenge]);
 
+  const getWorkoutTypeLabel = (type: string) => {
+    switch (type) {
+      case 'treadmill': return '트레드밀';
+      case 'stairmaster': return '천국의계단';
+      case 'cycling': return '싸이클';
+      default: return '야외러닝';
+    }
+  };
+
   // Submit Log
   const handleRunSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedMemberId || !distance || !durationMin) return;
-    const totalSeconds = (Number(durationMin) * 60) + (Number(durationSec || 0));
+    if (!selectedMemberId || !durationMin) return;
+
+    let targetDistance = Number(distance || 0);
+    let totalSeconds = (Number(durationMin) * 60) + (Number(durationSec || 0));
+
+    // Auto convert Stairmaster & Cycling (10 mins = 1 km)
+    if (workoutType === 'stairmaster' || workoutType === 'cycling') {
+      targetDistance = Number(durationMin) / 10;
+      totalSeconds = Number(durationMin) * 60;
+    } else {
+      if (!distance) return;
+    }
+
     try {
-      await onAddRun(selectedMemberId, Number(distance), totalSeconds, runNotes, runDate);
+      await onAddRun(
+        selectedMemberId,
+        targetDistance,
+        totalSeconds,
+        runNotes,
+        runDate,
+        workoutType
+      );
       // Reset Form
       setDistance('');
       setDurationMin('');
@@ -81,8 +117,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     e.preventDefault();
     if (!memberName.trim()) return;
     try {
-      await onAddMember(memberName.trim(), memberGender);
+      await onAddMember(memberName.trim(), memberGender, memberNickname.trim() || undefined);
       setMemberName('');
+      setMemberNickname('');
     } catch (error) {
       console.error('Failed to add member:', error);
       alert('회원 등록에 실패했습니다. 이미 존재하는 이름이거나 입력값을 확인해 주세요.');
@@ -170,7 +207,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-400 mb-1.5">러닝 날짜</label>
+              <label className="block text-xs font-bold text-gray-400 mb-1.5">운동 날짜</label>
               <input
                 type="date"
                 value={runDate}
@@ -181,17 +218,35 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
           </div>
 
+          <div>
+            <label className="block text-xs font-bold text-gray-400 mb-1.5">운동 종류</label>
+            <select
+              value={workoutType}
+              onChange={(e) => setWorkoutType(e.target.value as any)}
+              className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+              required
+            >
+              <option value="outdoor">야외러닝</option>
+              <option value="treadmill">트레드밀</option>
+              <option value="stairmaster">천국의계단</option>
+              <option value="cycling">싸이클</option>
+            </select>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-400 mb-1.5">러닝 거리 (km)</label>
+              <label className="block text-xs font-bold text-gray-400 mb-1.5">
+                운동 거리 {(workoutType === 'stairmaster' || workoutType === 'cycling') ? '(자동 산출)' : '(km)'}
+              </label>
               <input
                 type="number"
                 step="0.01"
-                placeholder="예: 5.25"
-                value={distance}
+                placeholder={(workoutType === 'stairmaster' || workoutType === 'cycling') ? "시간 입력 시 자동 변환" : "예: 5.25"}
+                value={(workoutType === 'stairmaster' || workoutType === 'cycling') ? (Number(durationMin || 0) / 10).toFixed(1) : distance}
                 onChange={(e) => setDistance(e.target.value)}
-                className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
-                required
+                className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange disabled:opacity-50 disabled:cursor-not-allowed"
+                required={workoutType !== 'stairmaster' && workoutType !== 'cycling'}
+                disabled={workoutType === 'stairmaster' || workoutType === 'cycling'}
               />
             </div>
 
@@ -203,16 +258,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   placeholder="분 (Min)"
                   value={durationMin}
                   onChange={(e) => setDurationMin(e.target.value)}
-                  className="w-1/2 bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                  className="flex-1 bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
                   required
                 />
-                <input
-                  type="number"
-                  placeholder="초 (Sec)"
-                  value={durationSec}
-                  onChange={(e) => setDurationSec(e.target.value)}
-                  className="w-1/2 bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
-                />
+                {(workoutType !== 'stairmaster' && workoutType !== 'cycling') && (
+                  <input
+                    type="number"
+                    placeholder="초 (Sec)"
+                    value={durationSec}
+                    onChange={(e) => setDurationSec(e.target.value)}
+                    className="flex-1 bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -243,14 +300,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         <form onSubmit={handleMemberSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-gray-400 mb-1.5">회원 이름 / 닉네임</label>
-            <input
-              type="text"
-              placeholder="예: 홍길동"
-              value={memberName}
-              onChange={(e) => setMemberName(e.target.value)}
-              className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
-              required
-            />
+            <div className="flex gap-4">
+              <input
+                type="text"
+                placeholder="본명 (예: 홍길동)"
+                value={memberName}
+                onChange={(e) => setMemberName(e.target.value)}
+                className="w-1/2 bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                required
+              />
+              <input
+                type="text"
+                maxLength={10}
+                placeholder="닉네임 (최대 10자)"
+                value={memberNickname}
+                onChange={(e) => setMemberNickname(e.target.value)}
+                className="w-1/2 bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+              />
+            </div>
           </div>
 
           <div>
@@ -393,10 +460,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               >
                 <div className="text-xs">
                   <span className="font-black text-white block">
-                    {members.find((m) => m.id === run.member_id)?.name || '알 수 없음'}
+                    {(() => {
+                      const m = members.find((member) => member.id === run.member_id);
+                      return m ? (m.nickname ? `${m.nickname} (${m.name})` : m.name) : '알 수 없음';
+                    })()}
                   </span>
                   <span className="text-[10px] text-gray-500 font-bold">
-                    {run.distance.toFixed(2)}km ({run.run_date})
+                    [{getWorkoutTypeLabel(run.type)}] {run.distance.toFixed(2)}km ({run.run_date})
                   </span>
                 </div>
 
