@@ -305,7 +305,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <button
                   onClick={async () => {
                     if (window.confirm('이 러닝 활동을 영구히 삭제하시겠습니까?')) {
-                      await onDeleteRun(run.id);
+                      try {
+                        await onDeleteRun(run.id);
+                      } catch (err) {
+                        console.error('Delete run error:', err);
+                        alert('러닝 기록 삭제에 실패했습니다. 다시 시도해 주세요.');
+                      }
                     }
                   }}
                   className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
