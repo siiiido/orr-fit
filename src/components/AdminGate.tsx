@@ -10,6 +10,8 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onClose, onSuccess }) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
   const correctPin = import.meta.env.VITE_ADMIN_PASSCODE || '0000';
+  const isNumeric = /^\d+$/.test(correctPin);
+  const pinLength = correctPin.length;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,12 +46,12 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onClose, onSuccess }) => {
             <div>
               <input
                 type="password"
-                maxLength={4}
-                placeholder="PIN 번호 (4자리)"
+                maxLength={pinLength}
+                placeholder={isNumeric ? `PIN 번호 (${pinLength}자리)` : "패스코드 입력"}
                 value={pin}
                 onChange={(e) => {
                   setError(false);
-                  setPin(e.target.value.replace(/\D/g, ''));
+                  setPin(isNumeric ? e.target.value.replace(/\D/g, '') : e.target.value);
                 }}
                 className={`w-full bg-brand-darkBg text-center text-xl tracking-widest font-black border rounded-xl py-3 text-white focus:outline-none ${
                   error ? 'border-red-500' : 'border-gray-800 focus:border-brand-orange'
@@ -58,7 +60,7 @@ export const AdminGate: React.FC<AdminGateProps> = ({ onClose, onSuccess }) => {
               />
               {error && (
                 <span className="text-[10px] text-red-500 font-bold block mt-2">
-                  올바르지 않은 패스코드입니다. (기본: 0000)
+                  올바르지 않은 패스코드입니다. {correctPin === '0000' && '(기본: 0000)'}
                 </span>
               )}
             </div>
