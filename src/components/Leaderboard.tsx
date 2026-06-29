@@ -56,9 +56,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
           Hall of Fame
         </h3>
 
-        <div className="flex items-end justify-center gap-2 md:gap-4 pt-12 pb-2">
+        <div className="grid grid-cols-3 gap-2 md:gap-4 items-end max-w-lg mx-auto pt-12 pb-2">
           {podiumArrangement.map((entry, index) => {
-            if (!entry) return <div key={index} className="flex-1"></div>;
+            if (!entry) return <div key={index}></div>;
 
             const isFirst = entry.memberId === topThree[0]?.memberId;
             const isThird = entry.memberId === topThree[2]?.memberId;
@@ -82,22 +82,30 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
               rankName = '3rd';
             }
 
+            const medalEmoji = getTierMedalEmoji(entry.highestChallengeTier);
+
             return (
-              <div key={entry.memberId} className="flex flex-col items-center flex-1 relative group">
+              <div key={entry.memberId} className="flex flex-col items-center relative group min-w-0">
                 {crownIcon}
 
                 {/* Nickname & Name block clickable */}
                 <button
                   onClick={() => onSelectMember(entry.memberId)}
-                  className="text-sm font-black text-white text-center max-w-[120px] truncate mb-2 block hover:underline cursor-pointer"
+                  className="w-full text-center mb-2 hover:underline cursor-pointer flex flex-col items-center min-w-0"
                 >
                   {entry.nickname ? (
-                    <>
-                      <span className="text-brand-orange font-black block">{entry.nickname}</span>
-                      <span className="text-[10px] text-gray-500 font-normal">({entry.name})</span>
-                    </>
+                    <div className="w-full min-w-0">
+                      <span className="text-xs font-black text-brand-orange block truncate w-full flex items-center justify-center gap-0.5">
+                        {entry.nickname} {medalEmoji}
+                      </span>
+                      <span className="text-[9px] text-gray-500 font-normal block truncate w-full">
+                        ({entry.name})
+                      </span>
+                    </div>
                   ) : (
-                    entry.name
+                    <span className="text-xs font-black text-white block truncate w-full flex items-center justify-center gap-0.5">
+                      {entry.name} {medalEmoji}
+                    </span>
                   )}
                 </button>
 
