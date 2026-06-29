@@ -19,6 +19,7 @@ interface AdminPanelProps {
   onDeleteRun: (runId: string) => Promise<void>;
   onUpdateTarget: (target: number) => Promise<void>;
   onUpdateChallenge: (tiers: ChallengeTier[]) => Promise<void>;
+  onUpdateMemberNickname: (memberId: string, nickname?: string) => Promise<void>;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -31,6 +32,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onDeleteRun,
   onUpdateTarget,
   onUpdateChallenge,
+  onUpdateMemberNickname,
 }) => {
   // Tab State: 'run' | 'member' | 'settings' | 'history'
   const [activeTab, setActiveTab] = useState<'run' | 'member' | 'settings' | 'history'>('run');
@@ -48,6 +50,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [memberName, setMemberName] = useState('');
   const [memberGender, setMemberGender] = useState<'M' | 'F'>('M');
   const [memberNickname, setMemberNickname] = useState('');
+
+  // Editing Nicknames State
+  const [editingNicknames, setEditingNicknames] = useState<Record<string, string>>({});
+
+  const getNicknameVal = (memberId: string, currentNickname?: string) => {
+    if (editingNicknames[memberId] !== undefined) {
+      return editingNicknames[memberId];
+    }
+    return currentNickname || '';
+  };
+
+  const handleNicknameChange = (memberId: string, value: string) => {
+    setEditingNicknames({
+      ...editingNicknames,
+      [memberId]: value,
+    });
+  };
 
   // Target Setting State
   const [targetDistanceInput, setTargetDistanceInput] = useState(monthlyTarget.toString());
@@ -356,6 +375,58 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             신규 회원 등록 완료
           </button>
         </form>
+
+        {/* Divider */}
+        <div className="border-t border-gray-800 my-8" />
+
+        {/* Member list & Nickname Editor */}
+        <div className="space-y-4">
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+            회원 닉네임 수정
+          </h3>
+          <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+            {members.length === 0 ? (
+              <p className="text-xs text-gray-500 text-center py-6">등록된 회원이 없습니다.</p>
+            ) : (
+              members.map((m) => (
+                <div
+                  key={m.id}
+                  className="flex justify-between items-center bg-brand-darkBg p-3 rounded-xl border border-gray-800 gap-4"
+                >
+                  <div className="text-xs font-bold text-white whitespace-nowrap">
+                    {m.name} ({m.gender})
+                  </div>
+                  <div className="flex items-center gap-2 flex-1 max-w-[240px]">
+                    <input
+                      type="text"
+                      maxLength={10}
+                      placeholder="닉네임 입력 (최대 10자)"
+                      value={getNicknameVal(m.id, m.nickname)}
+                      onChange={(e) => handleNicknameChange(m.id, e.target.value)}
+                      className="w-full bg-brand-darkSurface border border-gray-850 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-brand-orange text-center"
+                    />
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const val = getNicknameVal(m.id, m.nickname).trim();
+                        try {
+                          await onUpdateMemberNickname(m.id, val || undefined);
+                          alert(`${m.name}님의 닉네임이 수정되었습니다!`);
+                        } catch (err) {
+                          console.error('Failed to update nickname:', err);
+                          alert('닉네임 수정에 실패했습니다. 다시 시도해 주세요.');
+                        }
+                      }}
+                      className="px-3 py-1.5 bg-brand-orange hover:bg-brand-orange/90 text-white text-xs font-bold rounded-lg transition-all"
+                    >
+                      수정
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       )}
 
       {/* Tab: Settings */}
