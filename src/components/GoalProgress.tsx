@@ -12,7 +12,7 @@ export const GoalProgress: React.FC<GoalProgressProps> = ({
   targetDistance,
   weeklyChallengeCompleteCount,
 }) => {
-  const percentage = Math.min(100, Math.round((currentDistance / targetDistance) * 100));
+  const percentage = targetDistance > 0 ? Math.min(100, Math.round((currentDistance / targetDistance) * 100)) : 0;
   
   // Circular SVG configurations
   const radius = 60;
