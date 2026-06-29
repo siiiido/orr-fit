@@ -96,7 +96,8 @@ export default function App() {
   const handleAddMember = async (name: string, gender: 'M' | 'F') => {
     await supabase
       .from('members')
-      .insert([{ name, gender }]);
+      .insert([{ name, gender }])
+      .throwOnError();
   };
 
   // Mutator: Add Run
@@ -109,7 +110,8 @@ export default function App() {
   ) => {
     await supabase
       .from('runs')
-      .insert([{ member_id: memberId, distance, duration, notes, run_date: date }]);
+      .insert([{ member_id: memberId, distance, duration, notes, run_date: date }])
+      .throwOnError();
   };
 
   // Mutator: Delete Run
@@ -117,14 +119,16 @@ export default function App() {
     await supabase
       .from('runs')
       .delete()
-      .eq('id', runId);
+      .eq('id', runId)
+      .throwOnError();
   };
 
   // Mutator: Update Monthly Target
   const handleUpdateTarget = async (newTarget: number) => {
     await supabase
       .from('settings')
-      .upsert([{ key: 'monthly_target', value: { distance: newTarget } }]);
+      .upsert([{ key: 'monthly_target', value: { distance: newTarget } }])
+      .throwOnError();
   };
 
   if (isLoading) {
