@@ -81,11 +81,11 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 overflow-y-auto flex items-start md:items-center justify-center p-4 py-8"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-brand-darkSurface border border-gray-800 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl relative"
+        className="bg-brand-darkSurface border border-gray-800 w-full max-w-md rounded-2xl shadow-2xl relative my-auto"
       >
         <button
           onClick={onClose}
