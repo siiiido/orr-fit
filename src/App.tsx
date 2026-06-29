@@ -151,6 +151,15 @@ export default function App() {
       .throwOnError();
   };
 
+  // Mutator: Update Member Nickname
+  const handleUpdateMemberNickname = async (memberId: string, nickname?: string) => {
+    await supabase
+      .from('members')
+      .update({ nickname })
+      .eq('id', memberId)
+      .throwOnError();
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-brand-darkBg flex items-center justify-center">
@@ -186,6 +195,7 @@ export default function App() {
             onDeleteRun={handleDeleteRun}
             onUpdateTarget={handleUpdateTarget}
             onUpdateChallenge={handleUpdateChallenge}
+            onUpdateMemberNickname={handleUpdateMemberNickname}
           />
         )}
 
