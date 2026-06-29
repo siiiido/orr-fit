@@ -35,6 +35,9 @@ alter publication supabase_realtime add table settings;
 
 -- Insert Initial Settings
 INSERT INTO settings (key, value) VALUES ('monthly_target', '{"distance": 2000}') ON CONFLICT (key) DO NOTHING;
+INSERT INTO settings (key, value) VALUES
+  ('monthly_challenge', '{"tiers":[{"km":30,"reward_days":3},{"km":50,"reward_days":7},{"km":80,"reward_days":14}]}')
+ON CONFLICT (key) DO NOTHING;
 
 -- Insert Mock Members
 INSERT INTO members (id, name, gender) VALUES 

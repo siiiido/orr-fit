@@ -29,3 +29,12 @@ export interface LeaderboardEntry {
   totalDuration: number; // in seconds
   lastRunDate: string;
 }
+
+export interface ChallengeTier {
+  km: number;
+  reward_days: number;
+}
+
+export interface MonthlyChallenge {
+  tiers: ChallengeTier[];
+}
