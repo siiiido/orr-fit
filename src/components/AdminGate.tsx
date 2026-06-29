@@ -9,11 +9,12 @@ interface AdminGateProps {
 export const AdminGate: React.FC<AdminGateProps> = ({ onClose, onSuccess }) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
+  const correctPin = import.meta.env.VITE_ADMIN_PASSCODE || '0000';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Super simple passcode for staff convenience
-    if (pin === '0000') {
+    if (pin === correctPin) {
       onSuccess();
     } else {
       setError(true);
