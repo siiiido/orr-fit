@@ -1,25 +1,29 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, ShieldAlert, Award } from 'lucide-react';
-import type { Member, Run } from '../types';
+import { Plus, Trash2, ShieldAlert, Award, Trophy } from 'lucide-react';
+import type { Member, Run, ChallengeTier, MonthlyChallenge } from '../types';
 
 interface AdminPanelProps {
   members: Member[];
   runs: Run[];
   monthlyTarget: number;
+  monthlyChallenge: MonthlyChallenge | null;
   onAddMember: (name: string, gender: 'M' | 'F') => Promise<void>;
   onAddRun: (memberId: string, distance: number, duration: number, notes: string, date: string) => Promise<void>;
   onDeleteRun: (runId: string) => Promise<void>;
   onUpdateTarget: (target: number) => Promise<void>;
+  onUpdateChallenge: (tiers: ChallengeTier[]) => Promise<void>;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
   members,
   runs,
   monthlyTarget,
+  monthlyChallenge,
   onAddMember,
   onAddRun,
   onDeleteRun,
   onUpdateTarget,
+  onUpdateChallenge,
 }) => {
   // Tab State: 'run' | 'member' | 'settings' | 'history'
   const [activeTab, setActiveTab] = useState<'run' | 'member' | 'settings' | 'history'>('run');
@@ -39,9 +43,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   // Target Setting State
   const [targetDistanceInput, setTargetDistanceInput] = useState(monthlyTarget.toString());
 
+  // Challenge Tiers State
+  const [challengeTiers, setChallengeTiers] = useState<ChallengeTier[]>(
+    monthlyChallenge?.tiers ?? [{ km: 30, reward_days: 3 }, { km: 50, reward_days: 7 }, { km: 80, reward_days: 14 }]
+  );
+
   React.useEffect(() => {
     setTargetDistanceInput(monthlyTarget.toString());
   }, [monthlyTarget]);
+
+  React.useEffect(() => {
+    if (monthlyChallenge?.tiers) {
+      setChallengeTiers(monthlyChallenge.tiers);
+    }
+  }, [monthlyChallenge]);
 
   // Submit Log
   const handleRunSubmit = async (e: React.FormEvent) => {
@@ -83,6 +98,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     } catch (error) {
       console.error('Failed to update target:', error);
       alert('목표 거리 수정에 실패했습니다.');
+    }
+  };
+
+  // Submit Challenge Tiers
+  const handleChallengeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const valid = challengeTiers.every((t) => t.km > 0 && t.reward_days > 0);
+    if (!valid) {
+      alert('모든 단계의 km와 보상 일수는 0보다 커야 합니다.');
+      return;
+    }
+    const sorted = [...challengeTiers].sort((a, b) => a.km - b.km);
+    try {
+      await onUpdateChallenge(sorted);
+      alert('월간 챌린지 단계가 업데이트되었습니다!');
+    } catch (err) {
+      console.error('Challenge update error:', err);
+      alert('챌린지 단계 업데이트에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
@@ -260,26 +293,91 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* Tab: Settings */}
       {activeTab === 'settings' && (
-        <form onSubmit={handleTargetSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-gray-400 mb-1.5">센터 월간 총 목표 거리 (km)</label>
-            <input
-              type="number"
-              value={targetDistanceInput}
-              onChange={(e) => setTargetDistanceInput(e.target.value)}
-              className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
-              required
-            />
-          </div>
+        <div className="space-y-8">
+          {/* Monthly Target */}
+          <form onSubmit={handleTargetSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-1.5">센터 월간 총 목표 거리 (km)</label>
+              <input
+                type="number"
+                value={targetDistanceInput}
+                onChange={(e) => setTargetDistanceInput(e.target.value)}
+                className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-black text-sm py-3 rounded-xl transition-all duration-300 shadow-orangeGlow flex items-center justify-center gap-1.5"
+            >
+              <Award className="w-4 h-4" />
+              목표 거리 업데이트
+            </button>
+          </form>
 
-          <button
-            type="submit"
-            className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-black text-sm py-3 rounded-xl transition-all duration-300 shadow-orangeGlow flex items-center justify-center gap-1.5"
-          >
-            <Award className="w-4 h-4" />
-            목표 거리 업데이트
-          </button>
-        </form>
+          {/* Divider */}
+          <div className="border-t border-gray-800" />
+
+          {/* Monthly Challenge Tiers */}
+          <form onSubmit={handleChallengeSubmit} className="space-y-4">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">월간 챌린지 단계 설정</h3>
+            <div className="space-y-2">
+              {challengeTiers.map((tier, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="1"
+                    value={tier.km}
+                    onChange={(e) => {
+                      const updated = [...challengeTiers];
+                      updated[idx] = { ...updated[idx], km: Number(e.target.value) };
+                      setChallengeTiers(updated);
+                    }}
+                    className="w-24 bg-brand-darkBg border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-orange text-center"
+                    placeholder="km"
+                  />
+                  <span className="text-xs text-gray-500 font-bold">km → 헬스권</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={tier.reward_days}
+                    onChange={(e) => {
+                      const updated = [...challengeTiers];
+                      updated[idx] = { ...updated[idx], reward_days: Number(e.target.value) };
+                      setChallengeTiers(updated);
+                    }}
+                    className="w-20 bg-brand-darkBg border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-orange text-center"
+                    placeholder="일"
+                  />
+                  <span className="text-xs text-gray-500 font-bold">일</span>
+                  <button
+                    type="button"
+                    onClick={() => setChallengeTiers(challengeTiers.filter((_, i) => i !== idx))}
+                    className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors ml-auto"
+                    aria-label="단계 삭제"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setChallengeTiers([...challengeTiers, { km: 0, reward_days: 0 }])}
+              className="flex items-center gap-1.5 text-xs font-bold text-brand-orange hover:text-brand-orange/80 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              단계 추가
+            </button>
+            <button
+              type="submit"
+              className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-black text-sm py-3 rounded-xl transition-all duration-300 shadow-orangeGlow flex items-center justify-center gap-1.5"
+            >
+              <Trophy className="w-4 h-4" />
+              챌린지 업데이트
+            </button>
+          </form>
+        </div>
       )}
 
       {/* Tab: History List & Delete */}
