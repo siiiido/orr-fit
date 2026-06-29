@@ -316,7 +316,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* Tab: Member Registration */}
       {activeTab === 'member' && (
-        <form onSubmit={handleMemberSubmit} className="space-y-4">
+        <div className="space-y-8">
+          <form onSubmit={handleMemberSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-gray-400 mb-1.5">회원 이름 / 닉네임</label>
             <div className="flex gap-4">
@@ -427,6 +428,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             )}
           </div>
         </div>
+      </div>
       )}
 
       {/* Tab: Settings */}
