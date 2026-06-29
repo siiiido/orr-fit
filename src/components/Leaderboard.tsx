@@ -4,23 +4,48 @@ import type { LeaderboardEntry } from '../types';
 
 interface LeaderboardProps {
   entries: LeaderboardEntry[];
+  onSelectMember: (memberId: string) => void;
 }
 
-export const Leaderboard: React.FC<LeaderboardProps> = ({ entries }) => {
+export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMember }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredEntries = entries.filter((entry) =>
-    entry.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
-  );
+  const filteredEntries = entries.filter((entry) => {
+    const search = searchQuery.trim().toLowerCase();
+    const matchName = entry.name.toLowerCase().includes(search);
+    const matchNick = entry.nickname?.toLowerCase().includes(search) || false;
+    return matchName || matchNick;
+  });
 
   const topThree = entries.slice(0, 3);
-
-  // Arrange podium order: [2nd, 1st, 3rd]
   const podiumArrangement = [
     topThree[1] || null, // 2nd
     topThree[0] || null, // 1st
     topThree[2] || null, // 3rd
   ];
+
+  const getTierMedalEmoji = (tier?: string) => {
+    if (tier === 'gold') return '🥇';
+    if (tier === 'silver') return '🥈';
+    if (tier === 'bronze') return '🥉';
+    return null;
+  };
+
+  const renderNameTag = (entry: LeaderboardEntry) => {
+    return (
+      <span className="flex items-center gap-1">
+        {entry.nickname ? (
+          <>
+            <span className="text-brand-orange font-black">{entry.nickname}</span>
+            <span className="text-[10px] text-gray-500 font-normal">({entry.name})</span>
+          </>
+        ) : (
+          <span className="font-bold text-white">{entry.name}</span>
+        )}
+        {getTierMedalEmoji(entry.highestChallengeTier)}
+      </span>
+    );
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -32,10 +57,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries }) => {
         </h3>
 
         <div className="flex items-end justify-center gap-2 md:gap-4 pt-12 pb-2">
-          {/* Podium Block Loop */}
           {podiumArrangement.map((entry, index) => {
             if (!entry) return <div key={index} className="flex-1"></div>;
-            
+
             const isFirst = entry.memberId === topThree[0]?.memberId;
             const isThird = entry.memberId === topThree[2]?.memberId;
 
@@ -61,17 +85,26 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries }) => {
             return (
               <div key={entry.memberId} className="flex flex-col items-center flex-1 relative group">
                 {crownIcon}
-                
-                {/* Member Name */}
-                <span className="text-sm font-black text-white text-center max-w-[90px] truncate mb-2 block">
-                  {entry.name}
-                </span>
-                {/* Distance */}
+
+                {/* Nickname & Name block clickable */}
+                <button
+                  onClick={() => onSelectMember(entry.memberId)}
+                  className="text-sm font-black text-white text-center max-w-[120px] truncate mb-2 block hover:underline cursor-pointer"
+                >
+                  {entry.nickname ? (
+                    <>
+                      <span className="text-brand-orange font-black block">{entry.nickname}</span>
+                      <span className="text-[10px] text-gray-500 font-normal">({entry.name})</span>
+                    </>
+                  ) : (
+                    entry.name
+                  )}
+                </button>
+
                 <span className={`text-xs font-black ${textColor} mb-2 block`}>
                   {entry.totalDistance.toFixed(1)} km
                 </span>
 
-                {/* Visual Podium Base */}
                 <div
                   className={`w-full rounded-t-xl flex flex-col justify-center items-center shadow-lg border-t transition-all duration-500 ${podiumHeight} ${
                     isFirst
@@ -82,7 +115,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries }) => {
                   <div className={`w-8 h-8 rounded-full ${badgeColor} flex items-center justify-center text-brand-darkBg font-black text-sm`}>
                     {rankName.substring(0, 1)}
                   </div>
-                  <span className="text-[10px] text-gray-500 font-bold mt-1">{entry.averagePace}</span>
+                  <span className="text-[10px] text-gray-500 font-bold mt-1 font-mono">{entry.averagePace}</span>
                 </div>
               </div>
             );
@@ -94,8 +127,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries }) => {
       <div className="bg-brand-darkSurface border border-gray-800 p-6 rounded-2xl flex-1 flex flex-col">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <h3 className="text-base font-bold text-white">회원 순위 현황</h3>
-          
-          {/* Search Input */}
+
           <div className="relative w-full md:w-48">
             <input
               type="text"
@@ -113,18 +145,17 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries }) => {
             <thead>
               <tr className="border-b border-gray-800 pb-2">
                 <th className="pb-2 text-center w-12">순위</th>
-                <th className="pb-2">이름</th>
-                <th className="pb-2 text-right">달린 횟수</th>
+                <th className="pb-2">이름 (닉네임)</th>
+                <th className="pb-2 text-right">기록 수</th>
                 <th className="pb-2 text-right">평균 페이스</th>
                 <th className="pb-2 text-right text-white">누적 거리</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-900">
-              {/* Display Top 3 in list too, for consistency */}
               {filteredEntries.map((entry) => {
-                const rank = entries.findIndex(e => e.memberId === entry.memberId) + 1;
+                const rank = entries.findIndex((e) => e.memberId === entry.memberId) + 1;
                 const isTop3 = rank <= 3;
-                
+
                 let medalColor = '';
                 if (rank === 1) medalColor = 'text-brand-gold';
                 if (rank === 2) medalColor = 'text-brand-silver';
@@ -139,13 +170,16 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries }) => {
                         <span className="font-bold text-gray-500">{rank}</span>
                       )}
                     </td>
-                    <td className="py-3 font-bold text-white">
-                      <div className="flex items-center gap-1.5">
-                        {entry.name}
+                    <td className="py-3">
+                      <button
+                        onClick={() => onSelectMember(entry.memberId)}
+                        className="flex items-center gap-1.5 hover:underline text-left cursor-pointer font-bold text-white"
+                      >
+                        {renderNameTag(entry)}
                         <span className={`text-[9px] px-1 rounded-md font-extrabold ${entry.gender === 'M' ? 'bg-blue-500/10 text-blue-400' : 'bg-pink-500/10 text-pink-400'}`}>
                           {entry.gender}
                         </span>
-                      </div>
+                      </button>
                     </td>
                     <td className="py-3 text-right">{entry.totalRuns}회</td>
                     <td className="py-3 text-right text-gray-500 font-mono">{entry.averagePace}</td>

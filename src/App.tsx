@@ -6,13 +6,15 @@ import { Leaderboard } from './components/Leaderboard';
 import { RecentActivity } from './components/RecentActivity';
 import { AdminGate } from './components/AdminGate';
 import { AdminPanel } from './components/AdminPanel';
+import { MemberDetailModal } from './components/MemberDetailModal';
 import { supabase } from './lib/supabase';
-import type { LeaderboardEntry, ChallengeTier } from './types';
+import type { LeaderboardEntry, ChallengeTier, Member } from './types';
 
 export default function App() {
   const { members, runs, monthlyTarget, monthlyChallenge, isLoading } = useDashboardData();
   const [isAdmin, setIsAdmin] = useState(false);
   const [showGate, setShowGate] = useState(false);
+  const [selectedDetailMember, setSelectedDetailMember] = useState<Member | null>(null);
 
   // Compute Global Metrics
   const totalDistance = runs.reduce((acc, r) => acc + r.distance, 0);
@@ -33,6 +35,7 @@ export default function App() {
       totalRuns: number;
       totalDuration: number;
       lastRunDate: string;
+      currentMonthDistance: number;
     }> = {};
 
     // Initialize all members with 0
@@ -42,8 +45,12 @@ export default function App() {
         totalRuns: 0,
         totalDuration: 0,
         lastRunDate: '',
+        currentMonthDistance: 0,
       };
     });
+
+    const now = new Date();
+    const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
     // Sum runs
     runs.forEach((r) => {
@@ -52,10 +59,20 @@ export default function App() {
       m.totalDistance += r.distance;
       m.totalRuns += 1;
       m.totalDuration += r.duration;
+      
+      // Calculate current calendar month distance for challenge tiers
+      if (r.run_date.startsWith(yearMonth)) {
+        m.currentMonthDistance += r.distance;
+      }
+
       if (!m.lastRunDate || new Date(r.run_date) > new Date(m.lastRunDate)) {
         m.lastRunDate = r.run_date;
       }
     });
+
+    const sortedTiers = monthlyChallenge
+      ? [...monthlyChallenge.tiers].sort((a, b) => a.km - b.km)
+      : [];
 
     const entries: LeaderboardEntry[] = members.map((m) => {
       const data = memberMap[m.id];
@@ -68,15 +85,26 @@ export default function App() {
         averagePace = `${mins}'${secs.toString().padStart(2, '0')}"`;
       }
 
+      // Check highest tier achieved this month
+      let highestChallengeTier: 'gold' | 'silver' | 'bronze' | undefined = undefined;
+      const tierLevels: ('bronze' | 'silver' | 'gold')[] = ['bronze', 'silver', 'gold'];
+      sortedTiers.forEach((tier, index) => {
+        if (data.currentMonthDistance >= tier.km) {
+          highestChallengeTier = tierLevels[Math.min(index, tierLevels.length - 1)];
+        }
+      });
+
       return {
         memberId: m.id,
         name: m.name,
+        nickname: m.nickname,
         gender: m.gender,
         totalDistance: data.totalDistance,
         totalRuns: data.totalRuns,
         averagePace,
         totalDuration: data.totalDuration,
         lastRunDate: data.lastRunDate,
+        highestChallengeTier,
       };
     });
 
@@ -84,10 +112,10 @@ export default function App() {
   };
 
   // Mutator: Add Member
-  const handleAddMember = async (name: string, gender: 'M' | 'F') => {
+  const handleAddMember = async (name: string, gender: 'M' | 'F', nickname?: string) => {
     await supabase
       .from('members')
-      .insert([{ name, gender }])
+      .insert([{ name, gender, nickname }])
       .throwOnError();
   };
 
@@ -97,11 +125,12 @@ export default function App() {
     distance: number,
     duration: number,
     notes: string,
-    date: string
+    date: string,
+    type: string
   ) => {
     await supabase
       .from('runs')
-      .insert([{ member_id: memberId, distance, duration, notes, run_date: date }])
+      .insert([{ member_id: memberId, distance, duration, notes, run_date: date, type }])
       .throwOnError();
   };
 
@@ -175,7 +204,13 @@ export default function App() {
 
           {/* Column 2: Hall of Fame & Leaderboard (Span 6) */}
           <div className="lg:col-span-6">
-            <Leaderboard entries={leaderboardEntries} />
+            <Leaderboard
+              entries={leaderboardEntries}
+              onSelectMember={(memberId) => {
+                const mem = members.find((m) => m.id === memberId);
+                if (mem) setSelectedDetailMember(mem);
+              }}
+            />
           </div>
 
           {/* Column 3: Recent Activity (Span 3) */}
@@ -193,6 +228,16 @@ export default function App() {
             setIsAdmin(true);
             setShowGate(false);
           }}
+        />
+      )}
+
+      {/* Member Detail Modal overlay */}
+      {selectedDetailMember && (
+        <MemberDetailModal
+          member={selectedDetailMember}
+          runs={runs}
+          onClose={() => setSelectedDetailMember(null)}
+          monthlyChallenge={monthlyChallenge}
         />
       )}
     </div>

@@ -26,8 +26,19 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ runs, members })
     localStorage.setItem('orr_fit_cheers', JSON.stringify(updated));
   };
 
-  const getMemberName = (memberId: string) => {
-    return members.find((m) => m.id === memberId)?.name || '알 수 없는 회원';
+  const getMemberDisplayName = (memberId: string) => {
+    const m = members.find((m) => m.id === memberId);
+    if (!m) return '알 수 없는 회원';
+    return m.nickname ? `${m.nickname} (${m.name})` : m.name;
+  };
+
+  const getWorkoutTypeLabel = (type: string) => {
+    switch (type) {
+      case 'treadmill': return '트레드밀';
+      case 'stairmaster': return '천국의계단';
+      case 'cycling': return '싸이클';
+      default: return '야외러닝';
+    }
   };
 
   const formatPace = (distance: number, duration: number) => {
@@ -69,9 +80,11 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ runs, members })
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <span className="text-xs font-black text-white block">
-                    {getMemberName(run.member_id)}
+                    {getMemberDisplayName(run.member_id)}
                   </span>
-                  <span className="text-[10px] text-gray-500 font-semibold">{run.run_date}</span>
+                  <span className="text-[10px] text-gray-500 font-semibold">
+                    [{getWorkoutTypeLabel(run.type)}] {run.run_date}
+                  </span>
                 </div>
                 <span className="text-xs font-black text-brand-orange bg-brand-orange/10 px-2.5 py-1 rounded-lg">
                   {run.distance.toFixed(1)} km
