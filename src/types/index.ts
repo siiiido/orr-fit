@@ -2,6 +2,7 @@ export interface Member {
   id: string;
   name: string;
   gender: 'M' | 'F';
+  nickname?: string;
   created_at: string;
 }
 
@@ -12,6 +13,7 @@ export interface Run {
   duration: number; // in seconds
   notes?: string;
   run_date: string;
+  type: 'treadmill' | 'outdoor' | 'stairmaster' | 'cycling';
   created_at: string;
 }
 
@@ -22,12 +24,14 @@ export interface GymSettings {
 export interface LeaderboardEntry {
   memberId: string;
   name: string;
+  nickname?: string;
   gender: 'M' | 'F';
   totalDistance: number;
   totalRuns: number;
   averagePace: string; // format: MM'SS"
   totalDuration: number; // in seconds
   lastRunDate: string;
+  highestChallengeTier?: string;
 }
 
 export interface ChallengeTier {

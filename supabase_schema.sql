@@ -54,3 +54,7 @@ INSERT INTO runs (member_id, distance, duration, notes, run_date) VALUES
   ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 15.0, 4800, '야외 러닝 완료', '2026-06-27'),
   ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 5.0, 1500, '런닝머신 페이스조절', '2026-06-28'),
   ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 10.0, 3200, '주말 아침 조깅', '2026-06-28');
+
+-- Migration: Add nickname and workout type columns
+ALTER TABLE members ADD COLUMN nickname VARCHAR(10);
+ALTER TABLE runs ADD COLUMN type VARCHAR(20) DEFAULT 'outdoor' NOT NULL;
