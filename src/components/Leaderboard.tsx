@@ -10,7 +10,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredEntries = entries.filter((entry) =>
-    entry.name.toLowerCase().includes(searchQuery.toLowerCase())
+    entry.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
   );
 
   const topThree = entries.slice(0, 3);
@@ -75,7 +75,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries }) => {
                 <div
                   className={`w-full rounded-t-xl flex flex-col justify-center items-center shadow-lg border-t transition-all duration-500 ${podiumHeight} ${
                     isFirst
-                      ? 'bg-brand-orange/20 border-brand-orange/40 shadow-orangeGlow/25'
+                      ? 'bg-brand-orange/20 border-brand-orange/40 shadow-orangeGlow'
                       : 'bg-brand-darkBg border-gray-800'
                   }`}
                 >
@@ -121,8 +121,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries }) => {
             </thead>
             <tbody className="divide-y divide-gray-900">
               {/* Display Top 3 in list too, for consistency */}
-              {filteredEntries.map((entry, idx) => {
-                const rank = idx + 1;
+              {filteredEntries.map((entry) => {
+                const rank = entries.findIndex(e => e.memberId === entry.memberId) + 1;
                 const isTop3 = rank <= 3;
                 
                 let medalColor = '';
@@ -139,11 +139,13 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries }) => {
                         <span className="font-bold text-gray-500">{rank}</span>
                       )}
                     </td>
-                    <td className="py-3 font-bold text-white flex items-center gap-1.5">
-                      {entry.name}
-                      <span className={`text-[9px] px-1 rounded-md font-extrabold ${entry.gender === 'M' ? 'bg-blue-500/10 text-blue-400' : 'bg-pink-500/10 text-pink-400'}`}>
-                        {entry.gender}
-                      </span>
+                    <td className="py-3 font-bold text-white">
+                      <div className="flex items-center gap-1.5">
+                        {entry.name}
+                        <span className={`text-[9px] px-1 rounded-md font-extrabold ${entry.gender === 'M' ? 'bg-blue-500/10 text-blue-400' : 'bg-pink-500/10 text-pink-400'}`}>
+                          {entry.gender}
+                        </span>
+                      </div>
                     </td>
                     <td className="py-3 text-right">{entry.totalRuns}회</td>
                     <td className="py-3 text-right text-gray-500 font-mono">{entry.averagePace}</td>

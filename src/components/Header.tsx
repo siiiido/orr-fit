@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
           className={`flex items-center gap-2 px-3 py-2 md:px-4 rounded-xl text-xs md:text-sm font-bold border transition-all duration-300 ${
             isAdmin
               ? 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500/20'
-              : 'bg-brand-orange/10 text-brand-orange border-brand-orange/20 hover:bg-brand-orange/20 shadow-orangeGlow/20 shadow-sm'
+              : 'bg-brand-orange/10 text-brand-orange border-brand-orange/20 hover:bg-brand-orange/20 shadow-orangeGlow shadow-sm'
           }`}
         >
           {isAdmin ? (
