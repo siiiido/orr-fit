@@ -1,0 +1,115 @@
+import React, { useState } from 'react';
+import { Heart, Activity } from 'lucide-react';
+import type { Run, Member } from '../types';
+
+interface RecentActivityProps {
+  runs: Run[];
+  members: Member[];
+}
+
+export const RecentActivity: React.FC<RecentActivityProps> = ({ runs, members }) => {
+  // Stores claps in local state. In real-world, this could be on the DB, but local-storage is fine for micro-reactions.
+  const [cheers, setCheers] = useState<Record<string, number>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('orr_fit_cheers') || '{}');
+    } catch {
+      return {};
+    }
+  });
+
+  const handleCheer = (runId: string) => {
+    const updated = {
+      ...cheers,
+      [runId]: (cheers[runId] || 0) + 1,
+    };
+    setCheers(updated);
+    localStorage.setItem('orr_fit_cheers', JSON.stringify(updated));
+  };
+
+  const getMemberName = (memberId: string) => {
+    return members.find((m) => m.id === memberId)?.name || '알 수 없는 회원';
+  };
+
+  const formatPace = (distance: number, duration: number) => {
+    if (!distance) return `00'00"`;
+    const totalMin = duration / 60;
+    const paceDecimal = totalMin / distance;
+    const mins = Math.floor(paceDecimal);
+    const secs = Math.round((paceDecimal - mins) * 60);
+    return `${mins}'${secs.toString().padStart(2, '0')}"`;
+  };
+
+  const formatTime = (seconds: number) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hrs > 0) {
+      return `${hrs}시간 ${mins}분`;
+    }
+    return `${mins}분 ${secs}초`;
+  };
+
+  return (
+    <div className="bg-brand-darkSurface border border-gray-800 p-6 rounded-2xl h-full flex flex-col">
+      <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
+        <Activity className="w-5 h-5 text-brand-orange" />
+        실시간 러닝 피드
+      </h3>
+
+      <div className="space-y-4 overflow-y-auto max-h-[600px] pr-2 flex-1">
+        {runs.length === 0 ? (
+          <p className="text-xs text-gray-500 text-center py-8 font-semibold">
+            아직 등록된 러닝 활동이 없습니다.
+          </p>
+        ) : (
+          runs.map((run) => (
+            <div
+              key={run.id}
+              className="bg-brand-darkBg/60 border border-gray-900 rounded-xl p-4 transition-all duration-300 hover:border-brand-orange/20"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <span className="text-xs font-black text-white block">
+                    {getMemberName(run.member_id)}
+                  </span>
+                  <span className="text-[10px] text-gray-500 font-semibold">{run.run_date}</span>
+                </div>
+                <span className="text-xs font-black text-brand-orange bg-brand-orange/10 px-2.5 py-1 rounded-lg">
+                  {run.distance.toFixed(1)} km
+                </span>
+              </div>
+
+              {run.notes && (
+                <p className="text-xs text-gray-300 font-medium mb-3 italic">
+                  "{run.notes}"
+                </p>
+              )}
+
+              <div className="flex justify-between items-center border-t border-gray-900 pt-3 mt-1">
+                <div className="flex items-center gap-4 text-[10px] font-bold text-gray-500 font-mono">
+                  <div>
+                    <span className="block text-gray-400 text-xs font-black">{formatTime(run.duration)}</span>
+                    시간
+                  </div>
+                  <div className="h-4 w-px bg-gray-800"></div>
+                  <div>
+                    <span className="block text-gray-400 text-xs font-black">{formatPace(run.distance, run.duration)}</span>
+                    페이스
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => handleCheer(run.id)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-brand-orange/5 border border-brand-orange/10 text-brand-orange hover:bg-brand-orange/15 active:scale-95 transition-all"
+                >
+                  <Heart className="w-3.5 h-3.5 fill-brand-orange text-brand-orange" />
+                  응원 {cheers[run.id] || 0}
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
