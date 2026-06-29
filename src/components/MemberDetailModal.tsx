@@ -70,6 +70,41 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
 
   const highestMedal = getChallengeTierMedal();
 
+  // Calculate next challenge tier status
+  const getNextTierStatus = () => {
+    if (!monthlyChallenge || monthlyChallenge.tiers.length === 0) return null;
+    const now = new Date();
+    const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const thisMonthDistance = memberRuns
+      .filter((r) => r.run_date.startsWith(yearMonth))
+      .reduce((sum, r) => sum + r.distance, 0);
+
+    const sortedTiers = [...monthlyChallenge.tiers].sort((a, b) => a.km - b.km);
+    const nextTier = sortedTiers.find((t) => t.km > thisMonthDistance);
+
+    const tierMedals = ['🥉', '🥈', '🥇'];
+    const getTierMedal = (tierKm: number) => {
+      const idx = sortedTiers.findIndex((t) => t.km === tierKm);
+      return tierMedals[Math.min(idx, tierMedals.length - 1)] ?? '🏅';
+    };
+
+    if (!nextTier) {
+      return {
+        completed: true,
+        text: '🎉 이번 달 모든 챌린지 달성 완료!',
+      };
+    }
+
+    const remaining = nextTier.km - thisMonthDistance;
+    const medal = getTierMedal(nextTier.km);
+    return {
+      completed: false,
+      text: `${medal} ${nextTier.km}km 달성까지 ${remaining.toFixed(1)}km 남음`,
+    };
+  };
+
+  const nextTierInfo = getNextTierStatus();
+
   const formatPace = (distance: number, durationSeconds: number) => {
     if (distance <= 0) return `00'00"`;
     const totalSecondsPerKm = Math.round(durationSeconds / distance);
@@ -112,9 +147,21 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
               </h3>
             )}
 
-            <div className="flex items-center gap-1.5 mt-3 text-xs text-gray-400 font-semibold bg-brand-darkBg/60 border border-gray-900 px-3 py-2 rounded-xl w-fit">
-              <Calendar className="w-4 h-4 text-brand-orange" />
-              <span>최근 인증일: {lastRunDate}</span>
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              <div className="flex items-center gap-1.5 text-xs text-gray-400 font-semibold bg-brand-darkBg/60 border border-gray-900 px-3 py-2 rounded-xl">
+                <Calendar className="w-4 h-4 text-brand-orange" />
+                <span>최근 인증일: {lastRunDate}</span>
+              </div>
+              
+              {nextTierInfo && (
+                <div className={`text-xs font-bold px-3 py-2 rounded-xl border ${
+                  nextTierInfo.completed 
+                    ? 'bg-green-500/10 border-green-500/20 text-green-400' 
+                    : 'bg-brand-orange/10 border-brand-orange/20 text-brand-orange'
+                }`}>
+                  {nextTierInfo.text}
+                </div>
+              )}
             </div>
           </div>
 

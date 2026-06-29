@@ -162,7 +162,11 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
                 if (rank === 3) medalColor = 'text-brand-bronze';
 
                 return (
-                  <tr key={entry.memberId} className="hover:bg-brand-darkBg/30 transition-colors">
+                  <tr
+                    key={entry.memberId}
+                    onClick={() => onSelectMember(entry.memberId)}
+                    className="hover:bg-brand-darkBg/30 transition-colors cursor-pointer group/row"
+                  >
                     <td className="py-3 text-center">
                       {isTop3 ? (
                         <Medal className={`w-5 h-5 mx-auto ${medalColor}`} />
@@ -171,15 +175,12 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
                       )}
                     </td>
                     <td className="py-3">
-                      <button
-                        onClick={() => onSelectMember(entry.memberId)}
-                        className="flex items-center gap-1.5 hover:underline text-left cursor-pointer font-bold text-white"
-                      >
+                      <div className="flex items-center gap-1.5 text-left font-bold text-white group-hover/row:underline">
                         {renderNameTag(entry)}
                         <span className={`text-[9px] px-1 rounded-md font-extrabold ${entry.gender === 'M' ? 'bg-blue-500/10 text-blue-400' : 'bg-pink-500/10 text-pink-400'}`}>
                           {entry.gender}
                         </span>
-                      </button>
+                      </div>
                     </td>
                     <td className="py-3 text-right hidden sm:table-cell">{entry.totalRuns}회</td>
                     <td className="py-3 text-right text-gray-500 font-mono hidden sm:table-cell">{entry.averagePace}</td>
