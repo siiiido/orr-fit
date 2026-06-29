@@ -31,7 +31,7 @@ export interface LeaderboardEntry {
   averagePace: string; // format: MM'SS"
   totalDuration: number; // in seconds
   lastRunDate: string;
-  highestChallengeTier?: string;
+  highestChallengeTier?: 'gold' | 'silver' | 'bronze';
 }
 
 export interface ChallengeTier {
