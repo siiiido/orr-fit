@@ -6,6 +6,8 @@ function App() {
   const { members, runs, monthlyTarget, isLoading } = useDashboardData();
   const [isAdmin, setIsAdmin] = useState(false);
   const [showGate, setShowGate] = useState(false);
+  const [passcode, setPasscode] = useState('');
+  const [passcodeError, setPasscodeError] = useState('');
 
   // Compute metrics
   const totalDistance = runs.reduce((acc, r) => acc + r.distance, 0);
@@ -81,24 +83,60 @@ function App() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="w-full max-w-sm p-6 bg-brand-darkSurface border border-brand-orange/10 rounded-2xl shadow-xl">
             <h3 className="text-lg font-bold text-white mb-2">관리자 인증</h3>
-            <p className="text-xs text-gray-400 mb-4">비밀번호를 입력하여 관리자 모드로 전환합니다. (임시: 아무 값 입력 또는 확인 클릭)</p>
-            <div className="flex justify-end gap-2">
-              <button 
-                onClick={() => setShowGate(false)}
-                className="px-4 py-2 text-xs font-semibold text-gray-400 hover:text-white transition"
-              >
-                취소
-              </button>
-              <button 
-                onClick={() => {
+            <p className="text-xs text-gray-400 mb-4">비밀번호를 입력하여 관리자 모드로 전환합니다.</p>
+            
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (passcode === '0000') {
                   setIsAdmin(true);
                   setShowGate(false);
-                }}
-                className="px-4 py-2 text-xs font-semibold bg-brand-orange text-white rounded-lg hover:bg-brand-orange/95 transition"
-              >
-                확인
-              </button>
-            </div>
+                  setPasscode('');
+                  setPasscodeError('');
+                } else {
+                  setPasscodeError('비밀번호가 올바르지 않습니다.');
+                  setPasscode('');
+                }
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <input
+                  type="password"
+                  value={passcode}
+                  onChange={(e) => setPasscode(e.target.value)}
+                  placeholder="비밀번호 4자리"
+                  maxLength={4}
+                  className="w-full px-3 py-2 bg-brand-darkBg border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-brand-orange text-center tracking-widest text-lg font-bold"
+                  autoFocus
+                />
+                {passcodeError && (
+                  <p className="text-red-500 text-xs mt-2 text-center font-semibold">
+                    {passcodeError}
+                  </p>
+                )}
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setShowGate(false);
+                    setPasscode('');
+                    setPasscodeError('');
+                  }}
+                  className="px-4 py-2 text-xs font-semibold text-gray-400 hover:text-white transition"
+                >
+                  취소
+                </button>
+                <button 
+                  type="submit"
+                  className="px-4 py-2 text-xs font-semibold bg-brand-orange text-white rounded-lg hover:bg-brand-orange/95 transition"
+                >
+                  확인
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
