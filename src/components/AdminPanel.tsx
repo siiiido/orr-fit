@@ -48,28 +48,42 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     e.preventDefault();
     if (!selectedMemberId || !distance || !durationMin) return;
     const totalSeconds = (Number(durationMin) * 60) + (Number(durationSec || 0));
-    await onAddRun(selectedMemberId, Number(distance), totalSeconds, runNotes, runDate);
-    
-    // Reset Form
-    setDistance('');
-    setDurationMin('');
-    setDurationSec('');
-    setRunNotes('');
+    try {
+      await onAddRun(selectedMemberId, Number(distance), totalSeconds, runNotes, runDate);
+      // Reset Form
+      setDistance('');
+      setDurationMin('');
+      setDurationSec('');
+      setRunNotes('');
+    } catch (error) {
+      console.error('Failed to add run:', error);
+      alert('러닝 기록 등록에 실패했습니다. 다시 시도해 주세요.');
+    }
   };
 
   // Submit Member
   const handleMemberSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!memberName.trim()) return;
-    await onAddMember(memberName.trim(), memberGender);
-    setMemberName('');
+    try {
+      await onAddMember(memberName.trim(), memberGender);
+      setMemberName('');
+    } catch (error) {
+      console.error('Failed to add member:', error);
+      alert('회원 등록에 실패했습니다. 이미 존재하는 이름이거나 입력값을 확인해 주세요.');
+    }
   };
 
   // Submit Target
   const handleTargetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onUpdateTarget(Number(targetDistanceInput));
-    alert('목표 거리가 갱신되었습니다!');
+    try {
+      await onUpdateTarget(Number(targetDistanceInput));
+      alert('목표 거리가 갱신되었습니다!');
+    } catch (error) {
+      console.error('Failed to update target:', error);
+      alert('목표 거리 수정에 실패했습니다.');
+    }
   };
 
   return (
