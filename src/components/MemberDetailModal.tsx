@@ -13,6 +13,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
   member,
   runs,
   onClose,
+  monthlyChallenge,
 }) => {
   const memberRuns = runs.filter((r) => r.member_id === member.id);
 
@@ -47,6 +48,28 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
     }
   });
 
+  // Calculate highest challenge tier achieved this month
+  const getChallengeTierMedal = () => {
+    if (!monthlyChallenge) return '';
+    const now = new Date();
+    const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const thisMonthDistance = memberRuns
+      .filter((r) => r.run_date.startsWith(yearMonth))
+      .reduce((sum, r) => sum + r.distance, 0);
+
+    const sortedTiers = [...monthlyChallenge.tiers].sort((a, b) => a.km - b.km);
+    const tierMedals = ['🥉', '🥈', '🥇'];
+    let highestMedal = '';
+    sortedTiers.forEach((tier, index) => {
+      if (thisMonthDistance >= tier.km) {
+        highestMedal = tierMedals[Math.min(index, tierMedals.length - 1)];
+      }
+    });
+    return highestMedal;
+  };
+
+  const highestMedal = getChallengeTierMedal();
+
   const formatPace = (distance: number, durationSeconds: number) => {
     if (distance <= 0) return `00'00"`;
     const totalSecondsPerKm = Math.round(durationSeconds / distance);
@@ -56,8 +79,14 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-brand-darkSurface border border-gray-800 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl relative">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-brand-darkSurface border border-gray-800 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl relative"
+      >
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
@@ -70,16 +99,16 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           <div className="mb-6">
             {member.nickname ? (
               <>
-                <h3 className="text-xl font-black text-brand-orange leading-tight">
-                  {member.nickname}
+                <h3 className="text-xl font-black text-brand-orange leading-tight flex items-center gap-1.5">
+                  {member.nickname} {highestMedal}
                 </h3>
                 <span className="text-xs text-gray-400 font-bold block mt-1">
                   본명: {member.name} ({member.gender})
                 </span>
               </>
             ) : (
-              <h3 className="text-xl font-black text-white leading-tight">
-                {member.name} ({member.gender})
+              <h3 className="text-xl font-black text-white leading-tight flex items-center gap-1.5">
+                {member.name} ({member.gender}) {highestMedal}
               </h3>
             )}
 
