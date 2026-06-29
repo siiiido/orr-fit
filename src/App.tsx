@@ -20,13 +20,13 @@ export default function App() {
 
   // Compute Weekly Challenge Completers (Distance >= 10km in current week)
   const getWeeklyChallengeCount = () => {
-    // Basic implementation: find members with sum of distance in last 7 days >= 10
     const oneWeekAgo = new Date();
+    oneWeekAgo.setHours(0, 0, 0, 0);
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     
     const memberWeeklyDistances: Record<string, number> = {};
     runs.forEach((r) => {
-      const runDate = new Date(r.run_date);
+      const runDate = new Date(r.run_date + 'T00:00:00');
       if (runDate >= oneWeekAgo) {
         memberWeeklyDistances[r.member_id] = (memberWeeklyDistances[r.member_id] || 0) + r.distance;
       }
@@ -69,13 +69,11 @@ export default function App() {
     const entries: LeaderboardEntry[] = members.map((m) => {
       const data = memberMap[m.id];
       
-      // Calculate average pace
       let averagePace = `00'00"`;
       if (data.totalDistance > 0) {
-        const totalMin = data.totalDuration / 60;
-        const paceDecimal = totalMin / data.totalDistance;
-        const mins = Math.floor(paceDecimal);
-        const secs = Math.round((paceDecimal - mins) * 60);
+        const totalSecondsPerKm = Math.round(data.totalDuration / data.totalDistance);
+        const mins = Math.floor(totalSecondsPerKm / 60);
+        const secs = totalSecondsPerKm % 60;
         averagePace = `${mins}'${secs.toString().padStart(2, '0')}"`;
       }
 

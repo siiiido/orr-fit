@@ -32,10 +32,9 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ runs, members })
 
   const formatPace = (distance: number, duration: number) => {
     if (!distance) return `00'00"`;
-    const totalMin = duration / 60;
-    const paceDecimal = totalMin / distance;
-    const mins = Math.floor(paceDecimal);
-    const secs = Math.round((paceDecimal - mins) * 60);
+    const totalSecondsPerKm = Math.round(duration / distance);
+    const mins = Math.floor(totalSecondsPerKm / 60);
+    const secs = totalSecondsPerKm % 60;
     return `${mins}'${secs.toString().padStart(2, '0')}"`;
   };
 
