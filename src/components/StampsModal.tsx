@@ -21,10 +21,10 @@ export const StampsModal: React.FC<StampsModalProps> = ({
 
   // 멤버별 도장 획득 이력 매핑
   const memberStampsMap = members.map(m => {
-    // 해당 멤버의 모든 랭킹 데이터 필터링 (최신 날짜순)
+    // 해당 멤버의 모든 랭킹 데이터 필터링 (오래된 날짜순)
     const records = monthlyRankings
       .filter(r => r.member_id === m.id)
-      .sort((a, b) => b.year_month.localeCompare(a.year_month));
+      .sort((a, b) => a.year_month.localeCompare(b.year_month));
 
     const totalStamps = Math.min(records.length, 6); // 최대 6개 도장 표시
 
@@ -54,7 +54,7 @@ export const StampsModal: React.FC<StampsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="w-full max-w-2xl bg-brand-darkSurface border border-brand-orange/20 rounded-2xl flex flex-col max-h-[85vh] shadow-2xl animate-in fade-in zoom-in duration-200">
+      <div className="w-full max-w-2xl bg-brand-darkSurface border border-brand-orange/20 rounded-2xl flex flex-col max-h-[85vh] shadow-2xl">
         
         {/* Header */}
         <div className="flex justify-between items-start p-6 border-b border-gray-800">
@@ -134,7 +134,7 @@ export const StampsModal: React.FC<StampsModalProps> = ({
                 {/* Stamp Board (6 slots) */}
                 <div className="grid grid-cols-6 gap-2 max-w-sm mb-3">
                   {Array.from({ length: 6 }).map((_, idx) => {
-                    const record = records[idx]; // 최신 랭킹순
+                    const record = records[idx]; // 날짜 오름차순
                     const isActive = !!record;
 
                     return (
@@ -142,7 +142,7 @@ export const StampsModal: React.FC<StampsModalProps> = ({
                         key={idx}
                         className={`aspect-square rounded-full flex flex-col items-center justify-center border text-[9px] font-black relative ${
                           isActive
-                            ? 'bg-brand-orange text-white border-brand-orange shadow-orangeGlow animate-in zoom-in-50 duration-350'
+                            ? 'bg-brand-orange text-white border-brand-orange shadow-orangeGlow'
                             : 'border-dashed border-gray-800 text-gray-600 bg-brand-darkSurface/50'
                         }`}
                       >
