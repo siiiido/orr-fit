@@ -7,6 +7,7 @@ import { RecentActivity } from './components/RecentActivity';
 import { AdminGate } from './components/AdminGate';
 import { AdminPanel } from './components/AdminPanel';
 import { MemberDetailModal } from './components/MemberDetailModal';
+import { StampsModal } from './components/StampsModal';
 import { supabase } from './lib/supabase';
 import type { LeaderboardEntry, ChallengeTier, Member } from './types';
 
@@ -15,6 +16,7 @@ export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showGate, setShowGate] = useState(false);
   const [selectedDetailMember, setSelectedDetailMember] = useState<Member | null>(null);
+  const [showStamps, setShowStamps] = useState(false);
 
   // Compute Global Metrics
   const totalDistance = runs.reduce((acc, r) => acc + r.distance, 0);
@@ -251,6 +253,7 @@ export default function App() {
                 const mem = members.find((m) => m.id === memberId);
                 if (mem) setSelectedDetailMember(mem);
               }}
+              onOpenStamps={() => setShowStamps(true)}
             />
           </div>
 
@@ -281,6 +284,14 @@ export default function App() {
           monthlyChallenge={monthlyChallenge}
         />
       )}
+
+      {/* Stamps Modal overlay */}
+      <StampsModal
+        isOpen={showStamps}
+        onClose={() => setShowStamps(false)}
+        members={members}
+        monthlyRankings={monthlyRankings}
+      />
     </div>
   );
 }

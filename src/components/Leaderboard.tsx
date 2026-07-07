@@ -5,9 +5,10 @@ import type { LeaderboardEntry } from '../types';
 interface LeaderboardProps {
   entries: LeaderboardEntry[];
   onSelectMember: (memberId: string) => void;
+  onOpenStamps: () => void;
 }
 
-export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMember }) => {
+export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMember, onOpenStamps }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredEntries = entries.filter((entry) => {
@@ -51,10 +52,18 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
     <div className="flex flex-col gap-6">
       {/* Podium for top 3 */}
       <div className="bg-brand-darkSurface border border-brand-orange/5 p-6 rounded-2xl">
-        <h3 className="text-lg font-black text-white text-center mb-6 uppercase tracking-wider flex items-center justify-center gap-2">
-          <Trophy className="w-5 h-5 text-brand-gold" />
-          Hall of Fame
-        </h3>
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 border-b border-gray-900 pb-4">
+          <h3 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-brand-gold" />
+            Hall of Fame
+          </h3>
+          <button
+            onClick={onOpenStamps}
+            className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-brand-orange to-yellow-600 hover:from-brand-orange/90 hover:to-yellow-700 text-white font-extrabold text-xs rounded-xl shadow-orangeGlow transition-all duration-300 animate-pulse flex items-center justify-center gap-1.5"
+          >
+            🏆 명예의 전당 도장판 보기
+          </button>
+        </div>
 
         <div className="grid grid-cols-3 gap-2 md:gap-4 items-end max-w-lg mx-auto pt-12 pb-2">
           {podiumArrangement.map((entry, index) => {
