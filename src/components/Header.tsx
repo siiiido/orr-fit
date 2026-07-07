@@ -18,7 +18,11 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="border-b border-brand-orange/10 bg-brand-darkSurface/80 backdrop-blur-md sticky top-0 z-50 px-4 py-3 md:px-8 flex justify-between items-center transition-all duration-300">
       <div className="flex items-center gap-3">
         <div>
-          <h1 className="text-xl md:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+          <h1 
+            className="text-xl md:text-2xl font-black tracking-tight text-white flex items-center gap-2 cursor-pointer"
+            onClick={() => window.location.reload()}
+            title="새로고침"
+          >
             ORR FIT <span className="text-brand-orange">RUNNING</span>
           </h1>
           <p className="text-xs text-gray-400 font-semibold hidden md:block">
