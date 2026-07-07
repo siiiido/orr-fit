@@ -23,6 +23,7 @@ export default {
       boxShadow: {
         orangeGlow: '0 0 15px rgba(255, 107, 0, 0.35)',
         goldGlow: '0 0 15px rgba(255, 199, 0, 0.4)',
+        blueGlow: '0 0 15px rgba(59, 130, 246, 0.4)',
       }
     },
   },

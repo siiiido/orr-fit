@@ -91,11 +91,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       }
     });
 
-    // 누적 거리가 0보다 큰 사람들 중 내림차순 정렬
     const sorted = Object.entries(memberDistances)
       .map(([memberId, dist]) => ({ memberId, dist }))
       .filter(item => item.dist > 0)
-      .sort((a, b) => b.dist - a.dist);
+      .sort((a, b) => b.dist - a.dist || a.memberId.localeCompare(b.memberId));
 
     // 1~6등 바인딩
     const calculatedInputs = Array.from({ length: 6 }, (_, idx) => {

@@ -37,8 +37,8 @@ export const StampsModal: React.FC<StampsModalProps> = ({
   });
 
   // 이름 및 닉네임 검색 필터
+  const search = searchQuery.trim().toLowerCase();
   const filteredMembers = memberStampsMap.filter(item => {
-    const search = searchQuery.trim().toLowerCase();
     const matchName = item.member.name.toLowerCase().includes(search);
     const matchNick = item.member.nickname?.toLowerCase().includes(search) || false;
     return matchName || matchNick;
