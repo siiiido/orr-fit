@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Calendar, Activity, Zap, Layers, Trophy } from 'lucide-react';
+import { X, Calendar } from 'lucide-react';
 import type { Member, Run, MonthlyChallenge } from '../types';
 
 interface MemberDetailModalProps {
@@ -63,6 +63,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
     treadmill: { distance: 0, duration: 0, count: 0 },
     stairmaster: { duration: 0, count: 0 },
     cycling: { duration: 0, count: 0 },
+    orr_run: { distance: 0, duration: 0, count: 0 },
   };
 
   memberRuns.forEach((r) => {
@@ -80,6 +81,10 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
     } else if (r.type === 'cycling') {
       stats.cycling.duration += r.duration;
       stats.cycling.count += 1;
+    } else if (r.type === 'orr_run') {
+      stats.orr_run.distance += r.distance;
+      stats.orr_run.duration += r.duration;
+      stats.orr_run.count += 1;
     }
   });
 
@@ -140,13 +145,6 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
 
   const nextTierInfo = getNextTierStatus();
 
-  const formatPace = (distance: number, durationSeconds: number) => {
-    if (distance <= 0) return `00'00"`;
-    const totalSecondsPerKm = Math.round(durationSeconds / distance);
-    const mins = Math.floor(totalSecondsPerKm / 60);
-    const secs = totalSecondsPerKm % 60;
-    return `${mins}'${secs.toString().padStart(2, '0')}"`;
-  };
 
   return (
     <div
@@ -200,127 +198,66 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
             </div>
           </div>
 
-          <div className="space-y-4">
-            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              운동 종류별 통계
-            </h4>
+          {/* Progress Section */}
+          <div className="bg-brand-darkBg/50 p-4 rounded-xl border border-gray-800">
+            <div className="flex justify-between items-end mb-2">
+              <div>
+                <p className="text-gray-400 text-xs">이번 달 누적</p>
+                <p className="text-xl font-bold text-white">{currentMonthDistance.toFixed(1)} km</p>
+              </div>
+              <div className="text-right">
+                <p className="text-gray-400 text-xs">총 누적</p>
+                <p className="text-md font-bold text-gray-300">{totalDistance.toFixed(1)} km</p>
+              </div>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {/* 1. 야외러닝 */}
-              <div className="bg-brand-darkBg border border-gray-950 p-4 rounded-xl">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-black text-white flex items-center gap-1.5">
-                    <Zap className="w-3.5 h-3.5 text-brand-orange" />
-                    야외러닝
+            {nextTargetKm > 0 && (
+              <div className="mt-4">
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-brand-orange font-semibold">
+                    {isMaxTierReached ? '최고 목표 달성!' : `다음 챌린지까지 ${distanceRemaining.toFixed(1)}km 남음`}
                   </span>
-                  <span className="text-[10px] text-gray-500 font-bold">
-                    {stats.outdoor.count}회 인증
-                  </span>
+                  <span className="text-gray-500">{nextTargetKm}km</span>
                 </div>
-                <div className="space-y-1 text-xs">
-                  <div className="flex justify-between text-gray-400 font-bold">
-                    <span>거리</span>
-                    <span className="text-white">{stats.outdoor.distance.toFixed(1)} km</span>
-                  </div>
-                  <div className="flex justify-between text-gray-400 font-bold">
-                    <span>시간</span>
-                    <span className="text-white">
-                      {Math.floor(stats.outdoor.duration / 60)}분
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-gray-400 font-bold">
-                    <span>페이스</span>
-                    <span className="text-brand-orange font-black font-mono">
-                      {formatPace(stats.outdoor.distance, stats.outdoor.duration)}
-                    </span>
-                  </div>
+                <div className="w-full bg-gray-900 rounded-full h-2.5 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-brand-orange to-orange-400 h-2.5 rounded-full transition-all duration-1000 ease-out" 
+                    style={{ width: `${animatedProgress}%` }}
+                  ></div>
                 </div>
               </div>
+            )}
+          </div>
 
-              {/* 2. 트레드밀 */}
-              <div className="bg-brand-darkBg border border-gray-950 p-4 rounded-xl">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-black text-white flex items-center gap-1.5">
-                    <Activity className="w-3.5 h-3.5 text-brand-orange" />
-                    트레드밀
-                  </span>
-                  <span className="text-[10px] text-gray-500 font-bold">
-                    {stats.treadmill.count}회 인증
-                  </span>
-                </div>
-                <div className="space-y-1 text-xs">
-                  <div className="flex justify-between text-gray-400 font-bold">
-                    <span>거리</span>
-                    <span className="text-white">{stats.treadmill.distance.toFixed(1)} km</span>
-                  </div>
-                  <div className="flex justify-between text-gray-400 font-bold">
-                    <span>시간</span>
-                    <span className="text-white">
-                      {Math.floor(stats.treadmill.duration / 60)}분
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-gray-400 font-bold">
-                    <span>페이스</span>
-                    <span className="text-brand-orange font-black font-mono">
-                      {formatPace(stats.treadmill.distance, stats.treadmill.duration)}
-                    </span>
-                  </div>
-                </div>
-              </div>
+          {/* Activity Grid */}
+          <div className="mt-6 grid grid-cols-2 gap-3 mb-6">
+            <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
+              <span className="text-xs text-gray-400 mb-1">야외 러닝</span>
+              <span className="text-lg font-bold text-white">{stats.outdoor.distance.toFixed(1)} km</span>
+              <span className="text-[10px] text-gray-500">{stats.outdoor.count}회</span>
+            </div>
+            
+            <div className="bg-gradient-to-br from-brand-orange/20 to-orange-600/10 p-3 rounded-xl border border-brand-orange/30 flex flex-col items-center relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:animate-[shimmer_1.5s_infinite]"></div>
+              <span className="text-xs text-brand-orange font-bold mb-1">ORR RUN 🔥</span>
+              <span className="text-lg font-bold text-white">{stats.orr_run.distance.toFixed(1)} km</span>
+              <span className="text-[10px] text-gray-400">{stats.orr_run.count}회</span>
+            </div>
 
-              {/* 3. 천국의계단 */}
-              <div className="bg-brand-darkBg border border-gray-950 p-4 rounded-xl">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-black text-white flex items-center gap-1.5">
-                    <Layers className="w-3.5 h-3.5 text-brand-orange" />
-                    천국의계단
-                  </span>
-                  <span className="text-[10px] text-gray-500 font-bold">
-                    {stats.stairmaster.count}회 인증
-                  </span>
-                </div>
-                <div className="space-y-1 text-xs">
-                  <div className="flex justify-between text-gray-400 font-bold">
-                    <span>시간</span>
-                    <span className="text-white">
-                      {Math.floor(stats.stairmaster.duration / 60)}분
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-gray-400 font-bold">
-                    <span>환산 거리</span>
-                    <span className="text-brand-orange font-black">
-                      {(stats.stairmaster.duration / 60 / 10).toFixed(1)} km
-                    </span>
-                  </div>
-                </div>
-              </div>
+            <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
+              <span className="text-xs text-gray-400 mb-1">트레드밀</span>
+              <span className="text-lg font-bold text-white">{stats.treadmill.distance.toFixed(1)} km</span>
+              <span className="text-[10px] text-gray-500">{stats.treadmill.count}회</span>
+            </div>
 
-              {/* 4. 싸이클 */}
-              <div className="bg-brand-darkBg border border-gray-950 p-4 rounded-xl">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-black text-white flex items-center gap-1.5">
-                    <Trophy className="w-3.5 h-3.5 text-brand-orange" />
-                    싸이클
-                  </span>
-                  <span className="text-[10px] text-gray-500 font-bold">
-                    {stats.cycling.count}회 인증
-                  </span>
-                </div>
-                <div className="space-y-1 text-xs">
-                  <div className="flex justify-between text-gray-400 font-bold">
-                    <span>시간</span>
-                    <span className="text-white">
-                      {Math.floor(stats.cycling.duration / 60)}분
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-gray-400 font-bold">
-                    <span>환산 거리</span>
-                    <span className="text-brand-orange font-black">
-                      {(stats.cycling.duration / 60 / 10).toFixed(1)} km
-                    </span>
-                  </div>
-                </div>
-              </div>
+            <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
+              <span className="text-xs text-gray-400 mb-1">기타 (머신/사이클)</span>
+              <span className="text-lg font-bold text-white">
+                {Math.floor((stats.stairmaster.duration + stats.cycling.duration) / 60)} 분
+              </span>
+              <span className="text-[10px] text-gray-500">
+                {stats.stairmaster.count + stats.cycling.count}회
+              </span>
             </div>
           </div>
         </div>

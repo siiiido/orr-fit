@@ -18,3 +18,9 @@ body {
   background: #FF6B00;
   border-radius: 3px;
 }
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
