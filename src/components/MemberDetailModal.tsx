@@ -251,12 +251,22 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
             </div>
 
             <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
-              <span className="text-xs text-gray-400 mb-1">기타 (머신/사이클)</span>
+              <span className="text-xs text-gray-400 mb-1">천국의 계단</span>
               <span className="text-lg font-bold text-white">
-                {Math.floor((stats.stairmaster.duration + stats.cycling.duration) / 60)} 분
+                {Math.floor(stats.stairmaster.duration / 60)} 분
               </span>
               <span className="text-[10px] text-gray-500">
-                {stats.stairmaster.count + stats.cycling.count}회
+                {stats.stairmaster.count}회
+              </span>
+            </div>
+
+            <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
+              <span className="text-xs text-gray-400 mb-1">실내 사이클</span>
+              <span className="text-lg font-bold text-white">
+                {Math.floor(stats.cycling.duration / 60)} 분
+              </span>
+              <span className="text-[10px] text-gray-500">
+                {stats.cycling.count}회
               </span>
             </div>
           </div>
