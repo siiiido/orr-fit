@@ -193,14 +193,87 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-brand-darkBg flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-sm font-bold text-gray-400">데이터를 실시간 동기화 중...</p>
+      <div className="min-h-screen bg-brand-darkBg flex flex-col items-center justify-center gap-8 relative overflow-hidden">
+        {/* Background ambient glow */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse 60% 40% at 50% 50%, rgba(255,106,0,0.12) 0%, transparent 70%)',
+            animation: 'bgPulse 2s ease-in-out infinite',
+          }}
+        />
+
+        {/* ORR Logo */}
+        <div className="relative flex items-center gap-2 select-none">
+          {['O', 'R', 'R'].map((letter, i) => (
+            <div key={i} className="relative" style={{ lineHeight: 1 }}>
+              <span
+                className="block font-black leading-none"
+                style={{
+                  fontSize: '96px',
+                  fontFamily: 'system-ui, sans-serif',
+                  letterSpacing: '-0.03em',
+                  color: '#ff6a00',
+                  textShadow: '0 0 30px rgba(255,106,0,0.9), 0 0 60px rgba(255,106,0,0.5)',
+                  animation: 'orrGlow 1.8s ease-in-out infinite',
+                  animationDelay: `${i * 0.15}s`,
+                }}
+              >
+                {letter}
+              </span>
+            </div>
+          ))}
         </div>
+
+        {/* Tagline */}
+        <div className="text-center">
+          <p className="text-[11px] font-black tracking-[0.3em] text-gray-500 uppercase">Running Club</p>
+          <div className="flex items-center gap-2 mt-3 justify-center">
+            <div className="h-px w-8 bg-brand-orange/40 rounded-full" />
+            <p
+              className="text-[10px] font-semibold text-gray-600"
+              style={{ animation: 'dotBlink 1.2s ease-in-out infinite' }}
+            >
+              데이터를 불러오는 중...
+            </p>
+            <div className="h-px w-8 bg-brand-orange/40 rounded-full" />
+          </div>
+        </div>
+
+        {/* Bottom progress bar */}
+        <div
+          className="absolute bottom-0 left-0 h-[2px] rounded-full"
+          style={{
+            background: 'linear-gradient(90deg, #ff6a00, #ffd700)',
+            animation: 'progressBar 1.6s ease-in-out infinite',
+          }}
+        />
+
+        <style>{`
+          @keyframes orrGlow {
+            0%   { color: #ff6a00; text-shadow: 0 0 30px rgba(255,106,0,0.9), 0 0 60px rgba(255,106,0,0.5); opacity: 1; }
+            50%  { color: #ffaa55; text-shadow: 0 0 50px rgba(255,106,0,1),   0 0 100px rgba(255,106,0,0.7); opacity: 0.85; }
+            100% { color: #ff6a00; text-shadow: 0 0 30px rgba(255,106,0,0.9), 0 0 60px rgba(255,106,0,0.5); opacity: 1; }
+          }
+          @keyframes bgPulse {
+            0%, 100% { opacity: 0.6; }
+            50%       { opacity: 1; }
+          }
+          @keyframes dotBlink {
+            0%, 100% { opacity: 0.4; }
+            50%       { opacity: 1; }
+          }
+          @keyframes progressBar {
+            0%   { width: 0%;   left: 0%; }
+            50%  { width: 55%;  left: 22%; }
+            100% { width: 0%;   left: 100%; }
+          }
+        `}</style>
       </div>
     );
   }
+
+
 
   const leaderboardEntries = getLeaderboardEntries();
 

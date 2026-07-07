@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trophy, Target } from 'lucide-react';
 import type { Member, Run, MonthlyChallenge, ChallengeTier } from '../types';
 
@@ -29,7 +29,39 @@ export const GoalProgress: React.FC<GoalProgressProps> = ({
   const radius = 60;
   const strokeWidth = 8;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  // Animated progress state
+  const [animatedPct, setAnimatedPct] = useState(0);
+  const [displayPct, setDisplayPct] = useState(0);
+
+  useEffect(() => {
+    const start = setTimeout(() => {
+      setAnimatedPct(percentage);
+    }, 300);
+
+    let frame: number;
+    let startTime: number;
+    const duration = 1400;
+    const countUp = (ts: number) => {
+      if (!startTime) startTime = ts;
+      const elapsed = ts - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayPct(Math.round(eased * percentage));
+      if (progress < 1) frame = requestAnimationFrame(countUp);
+    };
+    const countStart = setTimeout(() => {
+      frame = requestAnimationFrame(countUp);
+    }, 300);
+
+    return () => {
+      clearTimeout(start);
+      clearTimeout(countStart);
+      cancelAnimationFrame(frame);
+    };
+  }, [percentage]);
+
+  const strokeDashoffset = circumference - (animatedPct / 100) * circumference;
 
   // Month label: "2026.06"
   const now = new Date();
@@ -110,16 +142,17 @@ export const GoalProgress: React.FC<GoalProgressProps> = ({
                 cx="72"
                 cy="72"
                 r={radius}
-                className="stroke-brand-orange transition-all duration-1000 ease-out"
+                className="stroke-brand-orange"
                 strokeWidth={strokeWidth}
                 fill="transparent"
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
+                style={{ transition: 'stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1)' }}
               />
             </svg>
             <div className="absolute text-center">
-              <span className="block text-2xl font-black text-white">{percentage}%</span>
+              <span className="block text-2xl font-black text-white">{displayPct}%</span>
               <span className="text-[10px] text-gray-400 font-bold uppercase">달성도</span>
             </div>
           </div>

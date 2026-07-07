@@ -187,7 +187,7 @@ export const StampsModal: React.FC<StampsModalProps> = ({
           }}
         >
           {/* ── HEADER ── */}
-          <div className="relative px-5 pt-5 pb-4 flex-shrink-0">
+          <div className="relative px-4 pt-5 pb-0 flex-shrink-0">
             {/* Animated top border */}
             <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl overflow-hidden">
               <motion.div
@@ -198,32 +198,132 @@ export const StampsModal: React.FC<StampsModalProps> = ({
               />
             </div>
 
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <Zap className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  <span className="text-[10px] font-black text-yellow-400 tracking-widest uppercase">Hall of Fame</span>
+            {/* Title row */}
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-yellow-400 fill-yellow-400 flex-shrink-0" />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-black text-white leading-none">명예의 전당</h2>
+                    <span className="text-[9px] font-black text-yellow-400 tracking-widest uppercase bg-yellow-400/10 px-1.5 py-0.5 rounded-md border border-yellow-400/20">HALL OF FAME</span>
+                  </div>
+                  <p className="text-[10px] text-gray-500 font-semibold mt-0.5">보석을 모아 레전드가 되어보세요!</p>
                 </div>
-                <h2 className="text-xl font-black text-white leading-tight">
-                  명예의 전당
-                  <span className="text-brand-orange ml-1">보석 수집</span>
-                </h2>
-                <p className="text-[10px] text-gray-500 font-semibold mt-0.5">
-                  매월 1~6위 달성 시 보석 획득 · 6개 완성 = 선물 🎁
-                </p>
               </div>
               <button
                 onClick={onClose}
-                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white transition-all border border-white/10"
+                className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white transition-all border border-white/10"
                 aria-label="닫기"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            {/* ── NOTICE BOARD ── */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.4 }}
+              className="rounded-xl overflow-hidden mb-4"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,106,0,0.08) 0%, rgba(168,85,247,0.08) 100%)',
+                border: '1px solid rgba(255,106,0,0.25)',
+              }}
+            >
+              {/* Notice board header strip */}
+              <div
+                className="px-3 py-1.5 flex items-center gap-2"
+                style={{ background: 'linear-gradient(90deg, rgba(255,106,0,0.3), rgba(168,85,247,0.2))' }}
+              >
+                <span className="text-[10px] font-black text-orange-300 tracking-widest uppercase">📋 이달의 보상 안내</span>
+                <div className="flex-1 h-px bg-white/10" />
+                <motion.span
+                  className="text-[9px] font-black text-yellow-400"
+                  animate={{ opacity: [1, 0.4, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  ● LIVE
+                </motion.span>
+              </div>
+
+              <div className="px-3 py-3 space-y-3">
+                {/* Reward rule */}
+                <div className="flex items-start gap-2.5">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-base"
+                    style={{ background: 'rgba(255,106,0,0.15)', border: '1px solid rgba(255,106,0,0.3)' }}>
+                    💎
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-black text-white leading-snug">매월 <span className="text-brand-orange">1~6위</span> 달성 시 보석 1개 획득</p>
+                    <p className="text-[9px] text-gray-500 font-semibold mt-0.5">순위는 해당 월 누적 거리 기준으로 산정됩니다</p>
+                  </div>
+                </div>
+
+                {/* Gift reward */}
+                <div
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,106,0,0.08))',
+                    border: '1px solid rgba(255,215,0,0.25)',
+                  }}
+                >
+                  <motion.span
+                    className="text-2xl flex-shrink-0"
+                    animate={{ rotate: [-5, 5, -5], scale: [1, 1.1, 1] }}
+                    transition={{ duration: 1.2, repeat: Infinity }}
+                  >
+                    🎁
+                  </motion.span>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-black text-yellow-300 leading-none">보석 6개 완성 시 선물 증정!</p>
+                    <p className="text-[9px] text-gray-500 font-semibold mt-0.5">6개월 연속 또는 누적 6회 입상</p>
+                  </div>
+                  <div className="ml-auto flex-shrink-0">
+                    <span className="text-[9px] font-black text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded-lg border border-yellow-400/20">
+                      👑 LEGEND
+                    </span>
+                  </div>
+                </div>
+
+                {/* Tier roadmap */}
+                <div>
+                  <p className="text-[9px] font-black text-gray-600 uppercase tracking-wider mb-1.5">티어 로드맵</p>
+                  <div className="flex items-center gap-0.5">
+                    {[
+                      { label: 'ROOKIE', color: '#6b7280', gems: '0' },
+                      { label: 'BRONZE', color: '#cd7f32', gems: '1' },
+                      { label: 'SILVER', color: '#a8a9ad', gems: '3' },
+                      { label: 'GOLD', color: '#ffd700', gems: '5' },
+                      { label: 'LEGEND', color: '#ff6a00', gems: '6', special: true },
+                    ].map((tier, i, arr) => (
+                      <React.Fragment key={tier.label}>
+                        <div className="flex flex-col items-center gap-0.5 flex-1">
+                          <div
+                            className="text-[7px] font-black px-1 py-0.5 rounded text-center w-full leading-none"
+                            style={{
+                              color: tier.color,
+                              background: `${tier.color}18`,
+                              border: `1px solid ${tier.color}33`,
+                              boxShadow: tier.special ? `0 0 6px ${tier.color}44` : 'none',
+                            }}
+                          >
+                            {tier.special ? '👑' : ''}{tier.label}
+                          </div>
+                          <span className="text-[7px] text-gray-600 font-bold">{tier.gems}개~</span>
+                        </div>
+                        {i < arr.length - 1 && (
+                          <div className="w-2 h-px bg-gray-700 flex-shrink-0 mb-3" />
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
 
           {/* ── SEARCH ── */}
-          <div className="px-5 pb-3 flex-shrink-0">
+          <div className="px-4 pb-3 flex-shrink-0">
             <div className="relative">
               <input
                 type="text"
