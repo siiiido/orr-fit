@@ -17,6 +17,41 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
 }) => {
   const memberRuns = runs.filter((r) => r.member_id === member.id);
 
+  const now = new Date();
+  const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  
+  const currentMonthRuns = memberRuns.filter(r => r.run_date.startsWith(currentMonthStr));
+  const currentMonthDistance = currentMonthRuns.reduce((sum, r) => sum + r.distance, 0);
+  const totalDistance = memberRuns.reduce((sum, r) => sum + r.distance, 0);
+
+  // Find next target
+  let nextTargetKm = 0;
+  let isMaxTierReached = false;
+  
+  if (monthlyChallenge && monthlyChallenge.tiers.length > 0) {
+    const sortedTiers = [...monthlyChallenge.tiers].sort((a, b) => a.km - b.km);
+    const nextTier = sortedTiers.find(t => t.km > currentMonthDistance);
+    if (nextTier) {
+      nextTargetKm = nextTier.km;
+    } else {
+      isMaxTierReached = true;
+      nextTargetKm = sortedTiers[sortedTiers.length - 1].km;
+    }
+  }
+
+  const distanceRemaining = isMaxTierReached ? 0 : Math.max(0, nextTargetKm - currentMonthDistance);
+  const progressPercent = nextTargetKm > 0 ? Math.min(100, (currentMonthDistance / nextTargetKm) * 100) : 0;
+  
+  // Animation state
+  const [animatedProgress, setAnimatedProgress] = React.useState(0);
+  React.useEffect(() => {
+    // Small delay to ensure the DOM is ready and the transition triggers
+    const timer = setTimeout(() => {
+      setAnimatedProgress(progressPercent);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [progressPercent]);
+
   // Get last certification date
   const lastRunDate = memberRuns.length > 0
     ? memberRuns.reduce((latest, r) => r.run_date > latest ? r.run_date : latest, memberRuns[0].run_date)
