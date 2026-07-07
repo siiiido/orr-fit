@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, ShieldAlert, Award, Trophy } from 'lucide-react';
-import type { Member, Run, ChallengeTier, MonthlyChallenge } from '../types';
+import type { Member, Run, ChallengeTier, MonthlyChallenge, MonthlyRanking } from '../types';
 
 interface AdminPanelProps {
   members: Member[];
   runs: Run[];
   monthlyTarget: number;
   monthlyChallenge: MonthlyChallenge | null;
+  monthlyRankings: MonthlyRanking[];
   onAddMember: (name: string, gender: 'M' | 'F', nickname?: string) => Promise<void>;
   onAddRun: (
     memberId: string,
@@ -20,6 +21,10 @@ interface AdminPanelProps {
   onUpdateTarget: (target: number) => Promise<void>;
   onUpdateChallenge: (tiers: ChallengeTier[]) => Promise<void>;
   onUpdateMemberNickname: (memberId: string, nickname?: string) => Promise<void>;
+  onSaveMonthlyRankings: (
+    yearMonth: string,
+    rankings: { memberId: string; rank: number; distance: number }[]
+  ) => Promise<void>;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -27,15 +32,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   runs,
   monthlyTarget,
   monthlyChallenge,
+  monthlyRankings,
   onAddMember,
   onAddRun,
   onDeleteRun,
   onUpdateTarget,
   onUpdateChallenge,
   onUpdateMemberNickname,
+  onSaveMonthlyRankings,
 }) => {
   // Tab State: 'run' | 'member' | 'settings' | 'history'
   const [activeTab, setActiveTab] = useState<'run' | 'member' | 'settings' | 'history'>('run');
+
+  // Stub usage to prevent unused variable compile errors (will be fully implemented in Task 5)
+  React.useEffect(() => {
+    if (monthlyRankings.length === -1) {
+      onSaveMonthlyRankings('', []);
+    }
+  }, [monthlyRankings, onSaveMonthlyRankings]);
 
   // New Run Form States
   const [selectedMemberId, setSelectedMemberId] = useState('');

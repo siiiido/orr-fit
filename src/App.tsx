@@ -11,7 +11,7 @@ import { supabase } from './lib/supabase';
 import type { LeaderboardEntry, ChallengeTier, Member } from './types';
 
 export default function App() {
-  const { members, runs, monthlyTarget, monthlyChallenge, isLoading } = useDashboardData();
+  const { members, runs, monthlyTarget, monthlyChallenge, monthlyRankings, isLoading } = useDashboardData();
   const [isAdmin, setIsAdmin] = useState(false);
   const [showGate, setShowGate] = useState(false);
   const [selectedDetailMember, setSelectedDetailMember] = useState<Member | null>(null);
@@ -160,6 +160,35 @@ export default function App() {
       .throwOnError();
   };
 
+  // Mutator: 월별 순위 리스트 저장 (일괄 갱신)
+  const handleSaveMonthlyRankings = async (
+    yearMonth: string,
+    rankings: { memberId: string; rank: number; distance: number }[]
+  ) => {
+    // 트랜잭션 대신, 기존 yearMonth에 해당하는 모든 기록 삭제 후 신규 upsert 처리
+    const { error: deleteError } = await supabase
+      .from('monthly_rankings')
+      .delete()
+      .eq('year_month', yearMonth);
+      
+    if (deleteError) throw deleteError;
+
+    if (rankings.length === 0) return;
+
+    const insertData = rankings.map(r => ({
+      member_id: r.memberId,
+      year_month: yearMonth,
+      rank: r.rank,
+      distance: r.distance
+    }));
+
+    const { error: insertError } = await supabase
+      .from('monthly_rankings')
+      .insert(insertData);
+
+    if (insertError) throw insertError;
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-brand-darkBg flex items-center justify-center">
@@ -190,12 +219,14 @@ export default function App() {
             runs={runs}
             monthlyTarget={monthlyTarget}
             monthlyChallenge={monthlyChallenge}
+            monthlyRankings={monthlyRankings}
             onAddMember={handleAddMember}
             onAddRun={handleAddRun}
             onDeleteRun={handleDeleteRun}
             onUpdateTarget={handleUpdateTarget}
             onUpdateChallenge={handleUpdateChallenge}
             onUpdateMemberNickname={handleUpdateMemberNickname}
+            onSaveMonthlyRankings={handleSaveMonthlyRankings}
           />
         )}
 
