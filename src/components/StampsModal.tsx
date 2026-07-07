@@ -24,20 +24,12 @@ export const StampsModal: React.FC<StampsModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
-      const timer = setTimeout(() => setIsLoading(false), 1500);
+      const timer = setTimeout(() => setIsLoading(false), 800);
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
-
-  if (isLoading) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-        <DotLottieReact src="/run.lottie" loop autoplay style={{ width: 200, height: 200 }} />
-      </div>
-    );
-  }
 
   // 멤버별 도장 획득 이력 매핑
   const memberStampsMap = members.map(m => {
@@ -73,13 +65,18 @@ export const StampsModal: React.FC<StampsModalProps> = ({
   });
 
   return (
-    <motion.div 
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-        onClick={onClose}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      {isLoading ? (
+        <div onClick={(e) => e.stopPropagation()}>
+          <DotLottieReact src="/run.lottie" loop autoplay style={{ width: 200, height: 200 }} />
+        </div>
+      ) : (
         <motion.div 
           className="w-full max-w-2xl bg-brand-darkSurface border border-brand-orange/20 rounded-2xl flex flex-col max-h-[85vh] shadow-2xl"
           onClick={(e) => e.stopPropagation()}
@@ -211,7 +208,8 @@ export const StampsModal: React.FC<StampsModalProps> = ({
             ))
           )}
         </div>
-      </motion.div>
         </motion.div>
+      )}
+    </motion.div>
   );
 };
