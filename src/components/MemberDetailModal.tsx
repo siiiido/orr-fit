@@ -237,11 +237,10 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
               <span className="text-[10px] text-gray-500">{stats.outdoor.count}회</span>
             </div>
             
-            <div className="bg-gradient-to-br from-brand-orange/20 to-orange-600/10 p-3 rounded-xl border border-brand-orange/30 flex flex-col items-center relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:animate-[shimmer_1.5s_infinite]"></div>
-              <span className="text-xs text-brand-orange font-bold mb-1">ORR RUN 🔥</span>
+            <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
+              <span className="text-xs text-gray-400 mb-1">ORR RUN</span>
               <span className="text-lg font-bold text-white">{stats.orr_run.distance.toFixed(1)} km</span>
-              <span className="text-[10px] text-gray-400">{stats.orr_run.count}회</span>
+              <span className="text-[10px] text-gray-500">{stats.orr_run.count}회</span>
             </div>
 
             <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
