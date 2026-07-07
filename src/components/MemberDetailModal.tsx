@@ -232,7 +232,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           {/* Activity Grid */}
           <div className="mt-6 grid grid-cols-2 gap-3 mb-6">
             <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
-              <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Footprints className="w-3.5 h-3.5" /> 야외 러닝</span>
+              <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Footprints className="w-3.5 h-3.5 text-brand-orange" /> 야외 러닝</span>
               <span className="text-lg font-bold text-white">{stats.outdoor.distance.toFixed(1)} km</span>
               <span className="text-[10px] text-gray-500">{stats.outdoor.count}회</span>
             </div>
@@ -244,13 +244,13 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
             </div>
 
             <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
-              <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Activity className="w-3.5 h-3.5" /> 트레드밀</span>
+              <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Activity className="w-3.5 h-3.5 text-brand-orange" /> 트레드밀</span>
               <span className="text-lg font-bold text-white">{stats.treadmill.distance.toFixed(1)} km</span>
               <span className="text-[10px] text-gray-500">{stats.treadmill.count}회</span>
             </div>
 
             <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
-              <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Dumbbell className="w-3.5 h-3.5" /> 천국의 계단</span>
+              <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Dumbbell className="w-3.5 h-3.5 text-brand-orange" /> 천국의 계단</span>
               <span className="text-lg font-bold text-white">
                 {Math.floor(stats.stairmaster.duration / 60)} 분
               </span>
@@ -260,7 +260,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
             </div>
 
             <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
-              <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Bike className="w-3.5 h-3.5" /> 실내 사이클</span>
+              <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Bike className="w-3.5 h-3.5 text-brand-orange" /> 실내 사이클</span>
               <span className="text-lg font-bold text-white">
                 {Math.floor(stats.cycling.duration / 60)} 분
               </span>
