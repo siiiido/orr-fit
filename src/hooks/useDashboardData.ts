@@ -1,13 +1,14 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import type { Member, Run, MonthlyChallenge } from '../types';
+import type { Member, Run, MonthlyChallenge, MonthlyRanking } from '../types';
 
 export const useDashboardData = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [runs, setRuns] = useState<Run[]>([]);
   const [monthlyTarget, setMonthlyTarget] = useState<number>(2000);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [monthlyChallenge, setMonthlyChallenge] = useState<MonthlyChallenge | null>(null);
+  const [monthlyRankings, setMonthlyRankings] = useState<MonthlyRanking[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const isInitialLoadRef = useRef(true);
 
@@ -17,7 +18,7 @@ export const useDashboardData = () => {
         setIsLoading(true);
       }
       
-      const [settingsResult, challengeResult, membersResult, runsResult] = await Promise.all([
+      const [settingsResult, challengeResult, membersResult, runsResult, rankingsResult] = await Promise.all([
         supabase
           .from('settings')
           .select('*')
@@ -37,35 +38,24 @@ export const useDashboardData = () => {
           .from('runs')
           .select('id, member_id, distance, duration, notes, run_date, type, created_at')
           .order('run_date', { ascending: false })
+          .throwOnError(),
+        supabase
+          .from('monthly_rankings')
+          .select('id, member_id, year_month, rank, distance, created_at')
+          .order('year_month', { ascending: false })
+          .order('rank', { ascending: true })
           .throwOnError()
       ]);
 
-      // Handle settings
-      if (settingsResult.error) {
-        console.warn('Error fetching settings:', settingsResult.error);
-      }
       if (settingsResult.data && settingsResult.data.value) {
         setMonthlyTarget(settingsResult.data.value.distance || 2000);
-      } else {
-        setMonthlyTarget(2000);
-      }
-
-      // Handle monthly challenge
-      if (challengeResult.error) {
-        console.warn('Error fetching monthly_challenge:', challengeResult.error);
       }
       if (challengeResult.data && challengeResult.data.value?.tiers) {
         setMonthlyChallenge({ tiers: challengeResult.data.value.tiers });
-      } else {
-        setMonthlyChallenge(null);
       }
-
-      // Handle members
       if (membersResult.data) {
         setMembers(membersResult.data as Member[]);
       }
-
-      // Handle runs
       if (runsResult.data) {
         setRuns(runsResult.data.map(r => ({
           ...r,
@@ -73,6 +63,12 @@ export const useDashboardData = () => {
           duration: Number(r.duration),
           type: r.type || 'outdoor'
         })) as Run[]);
+      }
+      if (rankingsResult.data) {
+        setMonthlyRankings(rankingsResult.data.map(rk => ({
+          ...rk,
+          distance: Number(rk.distance)
+        })) as MonthlyRanking[]);
       }
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
@@ -85,7 +81,6 @@ export const useDashboardData = () => {
   useEffect(() => {
     fetchData();
 
-    // Single channel subscribing to all three tables — reduces connections from 3→1 per user
     const realtimeChannel = supabase
       .channel('orr-fit-dashboard')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'members' }, () => {
@@ -95,6 +90,9 @@ export const useDashboardData = () => {
         fetchData();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, () => {
+        fetchData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'monthly_rankings' }, () => {
         fetchData();
       })
       .subscribe();
@@ -109,6 +107,7 @@ export const useDashboardData = () => {
     runs,
     monthlyTarget,
     monthlyChallenge,
+    monthlyRankings,
     isLoading,
     refetch: fetchData
   };
