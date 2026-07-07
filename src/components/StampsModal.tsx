@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { motion } from 'framer-motion';
 import { X, Search, Trophy, Check } from 'lucide-react';
 import type { Member, MonthlyRanking } from '../types';
 
@@ -16,8 +18,26 @@ export const StampsModal: React.FC<StampsModalProps> = ({
   monthlyRankings,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Show loading animation when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoading(true);
+      const timer = setTimeout(() => setIsLoading(false), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <DotLottieReact src="/run.lottie" loop autoplay style={{ width: 200, height: 200 }} />
+      </div>
+    );
+  }
 
   // 멤버별 도장 획득 이력 매핑
   const memberStampsMap = members.map(m => {
@@ -53,14 +73,20 @@ export const StampsModal: React.FC<StampsModalProps> = ({
   });
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div 
-        className="w-full max-w-2xl bg-brand-darkSurface border border-brand-orange/20 rounded-2xl flex flex-col max-h-[85vh] shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
+    <motion.div 
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        onClick={onClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
       >
+        <motion.div 
+          className="w-full max-w-2xl bg-brand-darkSurface border border-brand-orange/20 rounded-2xl flex flex-col max-h-[85vh] shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 20, opacity: 0 }}
+        >
         
         {/* Header */}
         <div className="flex justify-between items-start p-6 border-b border-gray-800">
@@ -185,7 +211,7 @@ export const StampsModal: React.FC<StampsModalProps> = ({
             ))
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+        </motion.div>
   );
 };
