@@ -17,9 +17,6 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="border-b border-brand-orange/10 bg-brand-darkSurface/80 backdrop-blur-md sticky top-0 z-50 px-4 py-3 md:px-8 flex justify-between items-center transition-all duration-300">
       <div className="flex items-center gap-3">
-        <div className="bg-brand-orange/20 p-2 rounded-xl border border-brand-orange/30 animate-pulse">
-          <Flame className="w-6 h-6 text-brand-orange" />
-        </div>
         <div>
           <h1 className="text-xl md:text-2xl font-black tracking-tight text-white flex items-center gap-2">
             ORR FIT <span className="text-brand-orange">RUNNING</span>

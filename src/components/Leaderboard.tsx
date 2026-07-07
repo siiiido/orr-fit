@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Trophy, Medal, Star } from 'lucide-react';
+import { Search, Trophy, Medal } from 'lucide-react';
 import type { LeaderboardEntry } from '../types';
 
 interface LeaderboardProps {
@@ -48,15 +48,63 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
     );
   };
 
+  // 순위별 칭호·스타일 설정
+  const getRankConfig = (isFirst: boolean, isSecond: boolean) => {
+    if (isFirst) return {
+      title: '레이스킹',
+      emoji: '👑',
+      podiumH: 'h-40',
+      badgeBg: 'bg-brand-gold',
+      podiumBg: 'bg-brand-orange/15 border-brand-orange/50',
+      glow: '0 0 20px rgba(255,106,0,0.35)',
+      rankNum: '1',
+      nameColor: 'text-brand-orange',
+      distColor: 'text-brand-gold',
+      titleColor: 'text-yellow-300',
+    };
+    if (isSecond) return {
+      title: '러너즈하이',
+      emoji: '⚡',
+      podiumH: 'h-32',
+      badgeBg: 'bg-brand-silver',
+      podiumBg: 'bg-brand-darkBg border-gray-600',
+      glow: 'none',
+      rankNum: '2',
+      nameColor: 'text-white',
+      distColor: 'text-slate-300',
+      titleColor: 'text-slate-400',
+    };
+    return {
+      title: '페이스메이커',
+      emoji: '🔥',
+      podiumH: 'h-28',
+      badgeBg: 'bg-brand-bronze',
+      podiumBg: 'bg-brand-darkBg border-gray-700',
+      glow: 'none',
+      rankNum: '3',
+      nameColor: 'text-white',
+      distColor: 'text-amber-400',
+      titleColor: 'text-amber-500',
+    };
+  };
+
   return (
     <div className="flex flex-col gap-6">
       {/* Podium for top 3 */}
-      <div className="bg-brand-darkSurface border border-brand-orange/5 p-6 rounded-2xl">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 border-b border-gray-900 pb-4">
-          <h3 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-brand-gold" />
-            Hall of Fame
-          </h3>
+      <div className="bg-brand-darkSurface border border-brand-orange/5 p-5 rounded-2xl">
+
+        {/* ── Header ── */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mb-5 border-b border-gray-900 pb-4">
+          <div>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <Trophy className="w-4 h-4 text-brand-gold" />
+              <span className="text-[10px] font-black text-brand-gold tracking-widest uppercase">Hall of Fame</span>
+            </div>
+            <h3 className="text-lg font-black text-white leading-none">
+              이달의 <span className="text-brand-orange">Top 3</span>
+            </h3>
+            <p className="text-[10px] text-gray-600 font-semibold mt-0.5">누적 거리 기준 월간 상위 랭커</p>
+          </div>
           <button
             onClick={onOpenStamps}
             className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-brand-orange to-yellow-600 hover:from-brand-orange/90 hover:to-yellow-700 text-white font-extrabold text-xs rounded-xl shadow-orangeGlow transition-all duration-300 animate-pulse flex items-center justify-center gap-1.5"
@@ -65,74 +113,59 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 md:gap-4 items-end max-w-lg mx-auto pt-12 pb-2">
+        {/* ── Podium ── */}
+        <div className="grid grid-cols-3 gap-2 md:gap-3 items-end max-w-lg mx-auto pb-2" style={{ paddingTop: '8px' }}>
           {podiumArrangement.map((entry, index) => {
-            if (!entry) return <div key={index}></div>;
+            if (!entry) return <div key={index} />;
 
             const isFirst = entry.memberId === topThree[0]?.memberId;
-            const isThird = entry.memberId === topThree[2]?.memberId;
-
-            let podiumHeight = 'h-24';
-            let badgeColor = 'bg-brand-silver';
-            let textColor = 'text-brand-silver';
-            let rankName = '2nd';
-            let crownIcon = null;
-
-            if (isFirst) {
-              podiumHeight = 'h-36';
-              badgeColor = 'bg-brand-gold';
-              textColor = 'text-brand-gold';
-              rankName = '1st';
-              crownIcon = <Star className="w-5 h-5 text-brand-gold fill-brand-gold absolute -top-11 animate-pulse" />;
-            } else if (isThird) {
-              podiumHeight = 'h-20';
-              badgeColor = 'bg-brand-bronze';
-              textColor = 'text-brand-bronze';
-              rankName = '3rd';
-            }
-
+            const isSecond = entry.memberId === topThree[1]?.memberId;
+            const rankConfig = getRankConfig(isFirst, isSecond);
             const medalEmoji = getTierMedalEmoji(entry.highestChallengeTier);
 
             return (
-              <div key={entry.memberId} className="flex flex-col items-center relative group min-w-0">
-                {crownIcon}
+              <div key={entry.memberId} className="flex flex-col items-center min-w-0">
 
-                {/* Nickname & Name block clickable */}
+                {/* ── 이름 ── */}
                 <button
                   onClick={() => onSelectMember(entry.memberId)}
-                  className="w-full text-center mb-2 hover:underline cursor-pointer flex flex-col items-center min-w-0"
+                  className="w-full text-center mb-1 hover:opacity-75 transition-opacity cursor-pointer flex flex-col items-center min-w-0 px-1"
                 >
                   {entry.nickname ? (
                     <div className="w-full min-w-0">
-                      <span className="text-xs font-black text-brand-orange block whitespace-nowrap flex items-center justify-center gap-0.5">
+                      <span className={`text-sm font-black block truncate ${rankConfig.nameColor}`}>
                         {entry.nickname} {medalEmoji}
                       </span>
-                      <span className="text-[9px] text-gray-500 font-normal block whitespace-nowrap">
+                      <span className="text-[10px] text-gray-500 font-semibold block truncate">
                         ({entry.name})
                       </span>
                     </div>
                   ) : (
-                    <span className="text-xs font-black text-white block whitespace-nowrap flex items-center justify-center gap-0.5">
+                    <span className={`text-sm font-black block truncate ${rankConfig.nameColor}`}>
                       {entry.name} {medalEmoji}
                     </span>
                   )}
                 </button>
 
-                <span className={`text-xs font-black ${textColor} mb-2 block`}>
-                  {entry.totalDistance.toFixed(1)} km
+                {/* ── 거리 ── */}
+                <span className={`text-sm font-black ${rankConfig.distColor} mb-2 block tracking-tight`}>
+                  {entry.totalDistance.toFixed(1)}<span className="text-xs font-bold"> km</span>
                 </span>
 
+                {/* ── 포디움 기둥 (순위 번호 + 칭호) ── */}
                 <div
-                  className={`w-full rounded-t-xl flex flex-col justify-center items-center shadow-lg border-t transition-all duration-500 ${podiumHeight} ${
-                    isFirst
-                      ? 'bg-brand-orange/20 border-brand-orange/40 shadow-orangeGlow'
-                      : 'bg-brand-darkBg border-gray-800'
-                  }`}
+                  className={`w-full rounded-t-xl flex flex-col items-center justify-center gap-2 border-t ${rankConfig.podiumH} ${rankConfig.podiumBg}`}
+                  style={{ boxShadow: rankConfig.glow }}
                 >
-                  <div className={`w-8 h-8 rounded-full ${badgeColor} flex items-center justify-center text-brand-darkBg font-black text-sm`}>
-                    {rankName.substring(0, 1)}
+                  <div className={`w-10 h-10 rounded-full ${rankConfig.badgeBg} flex items-center justify-center text-brand-darkBg font-black text-lg`}>
+                    {rankConfig.rankNum}
                   </div>
-                  <span className="text-[10px] text-gray-500 font-bold mt-1 font-mono">{entry.averagePace}</span>
+                  <div className="text-center px-1">
+                    <div className="text-xl leading-none mb-0.5">{rankConfig.emoji}</div>
+                    <p className={`text-[10px] font-black ${rankConfig.titleColor} whitespace-nowrap leading-tight`}>
+                      {rankConfig.title}
+                    </p>
+                  </div>
                 </div>
               </div>
             );

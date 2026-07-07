@@ -148,7 +148,7 @@ export const GoalProgress: React.FC<GoalProgressProps> = ({
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
-                style={{ transition: 'stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1)' }}
+                style={{ transition: 'stroke-dashoffset 4s cubic-bezier(0.22, 1, 0.36, 1)' }}
               />
             </svg>
             <div className="absolute text-center">
