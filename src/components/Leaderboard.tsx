@@ -197,7 +197,6 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
                 <th className="pb-2 text-center w-12">순위</th>
                 <th className="pb-2">이름 (닉네임)</th>
                 <th className="pb-2 text-right hidden sm:table-cell">기록 수</th>
-                <th className="pb-2 text-right hidden sm:table-cell">평균 페이스</th>
                 <th className="pb-2 text-right text-white">누적 거리</th>
               </tr>
             </thead>
@@ -233,7 +232,6 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
                       </div>
                     </td>
                     <td className="py-3 text-right hidden sm:table-cell">{entry.totalRuns}회</td>
-                    <td className="py-3 text-right text-gray-500 font-mono hidden sm:table-cell">{entry.averagePace}</td>
                     <td className="py-3 text-right text-brand-orange font-black text-sm">{entry.totalDistance.toFixed(1)} km</td>
                   </tr>
                 );
