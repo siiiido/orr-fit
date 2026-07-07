@@ -41,15 +41,97 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onUpdateMemberNickname,
   onSaveMonthlyRankings,
 }) => {
-  // Tab State: 'run' | 'member' | 'settings' | 'history'
-  const [activeTab, setActiveTab] = useState<'run' | 'member' | 'settings' | 'history'>('run');
+  // Tab State: 'run' | 'member' | 'settings' | 'history' | 'stamps'
+  const [activeTab, setActiveTab] = useState<'run' | 'member' | 'settings' | 'history' | 'stamps'>('run');
 
-  // Stub usage to prevent unused variable compile errors (will be fully implemented in Task 5)
+  // stamps 관리용 상태값
+  const [selectedYearMonth, setSelectedYearMonth] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; // default: current month
+  });
+
+  const [rankingsInput, setRankingsInput] = useState<{ memberId: string; distance: string }[]>(
+    Array.from({ length: 6 }, () => ({ memberId: '', distance: '' }))
+  );
+
+  // 년-월 선택 시 이미 저장된 데이터가 있으면 폼 로드
   React.useEffect(() => {
-    if (monthlyRankings.length === -1) {
-      onSaveMonthlyRankings('', []);
+    const currentSaved = monthlyRankings.filter(r => r.year_month === selectedYearMonth);
+    const newInputs = Array.from({ length: 6 }, (_, idx) => {
+      const saved = currentSaved.find(r => r.rank === idx + 1);
+      return {
+        memberId: saved ? saved.member_id : '',
+        distance: saved ? saved.distance.toString() : ''
+      };
+    });
+    setRankingsInput(newInputs);
+  }, [selectedYearMonth, monthlyRankings]);
+
+  // 자동 계산 기능 함수 구현
+  const handleAutoCalculate = () => {
+    // runs 데이터 중 selectedYearMonth에 해당하는 데이터 필터링
+    const monthlyRuns = runs.filter(run => run.run_date.startsWith(selectedYearMonth));
+    
+    // 멤버별 총 거리 합산
+    const memberDistances: Record<string, number> = {};
+    // 모든 멤버 0으로 초기화
+    members.forEach(m => {
+      memberDistances[m.id] = 0;
+    });
+    // 기록 누적
+    monthlyRuns.forEach(run => {
+      if (memberDistances[run.member_id] !== undefined) {
+        memberDistances[run.member_id] += run.distance;
+      }
+    });
+
+    // 누적 거리가 0보다 큰 사람들 중 내림차순 정렬
+    const sorted = Object.entries(memberDistances)
+      .map(([memberId, dist]) => ({ memberId, dist }))
+      .filter(item => item.dist > 0)
+      .sort((a, b) => b.dist - a.dist);
+
+    // 1~6등 바인딩
+    const calculatedInputs = Array.from({ length: 6 }, (_, idx) => {
+      const item = sorted[idx];
+      return {
+        memberId: item ? item.memberId : '',
+        distance: item ? item.dist.toFixed(2) : ''
+      };
+    });
+    
+    setRankingsInput(calculatedInputs);
+  };
+
+  // 저장 핸들러
+  const handleRankingsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // 유효한 항목 필터링 (멤버ID가 있는 항목)
+    const validRankings = rankingsInput
+      .map((item, idx) => ({
+        memberId: item.memberId,
+        rank: idx + 1,
+        distance: Number(item.distance || 0)
+      }))
+      .filter(r => r.memberId !== '');
+
+    // 중복된 멤버가 있는지 확인
+    const memberIds = validRankings.map(r => r.memberId);
+    const hasDuplicates = new Set(memberIds).size !== memberIds.length;
+    if (hasDuplicates) {
+      alert('순위 내에 동일한 회원이 중복으로 등록되어 있습니다. 확인해 주세요.');
+      return;
     }
-  }, [monthlyRankings, onSaveMonthlyRankings]);
+
+    try {
+      await onSaveMonthlyRankings(selectedYearMonth, validRankings);
+      alert(`${selectedYearMonth} 명예의 전당 도장 정보가 저장되었습니다!`);
+    } catch (error) {
+      console.error('Failed to save rankings:', error);
+      alert('도장 정보 저장에 실패했습니다.');
+    }
+  };
 
   // New Run Form States
   const [selectedMemberId, setSelectedMemberId] = useState('');
@@ -203,6 +285,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           { id: 'member', label: '신규 회원 가입' },
           { id: 'settings', label: '목표 설정' },
           { id: 'history', label: '전체 기록 관리' },
+          { id: 'stamps', label: '명예의 전당 관리' },
         ] as const).map((tab) => (
           <button
             key={tab.id}
@@ -576,6 +659,107 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             ))
           )}
         </div>
+      )}
+
+      {/* Tab: Stamps Management */}
+      {activeTab === 'stamps' && (
+        <form onSubmit={handleRankingsSubmit} className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-brand-darkBg p-4 rounded-xl border border-gray-800">
+            <div className="flex-1">
+              <label className="block text-xs font-bold text-gray-400 mb-1.5">대상 년/월 선택</label>
+              <input
+                type="month"
+                value={selectedYearMonth}
+                onChange={(e) => setSelectedYearMonth(e.target.value)}
+                className="w-full bg-brand-darkSurface border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-orange"
+                required
+              />
+            </div>
+            <div className="flex items-end h-full">
+              <button
+                type="button"
+                onClick={handleAutoCalculate}
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-blueGlow"
+              >
+                <Trophy className="w-3.5 h-3.5" />
+                이번 달 기록 불러오기 (자동 계산)
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">순위별 회원 등록 (1등 ~ 6등)</h3>
+            <p className="text-[11px] text-gray-500">
+              ※ 자동 계산을 누르면 해당 월에 활동한 거리가 많은 순서대로 1~6등이 자동 기입됩니다.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {rankingsInput.map((input, idx) => {
+                const rank = idx + 1;
+                let badgeBg = 'bg-gray-800 text-gray-400';
+                if (rank === 1) badgeBg = 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20';
+                else if (rank === 2) badgeBg = 'bg-slate-300/10 text-slate-300 border border-slate-300/20';
+                else if (rank === 3) badgeBg = 'bg-amber-600/10 text-amber-500 border border-amber-600/20';
+
+                return (
+                  <div
+                    key={idx}
+                    className="bg-brand-darkBg p-4 rounded-xl border border-gray-800 space-y-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase ${badgeBg}`}>
+                        {rank}등 (Stamp {rank})
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 mb-1">회원 선택</label>
+                        <select
+                          value={input.memberId}
+                          onChange={(e) => {
+                            const next = [...rankingsInput];
+                            next[idx].memberId = e.target.value;
+                            setRankingsInput(next);
+                          }}
+                          className="w-full bg-brand-darkSurface border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-orange"
+                        >
+                          <option value="">-- 없음 --</option>
+                          {members.map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.name} ({m.gender})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 mb-1">누적 거리 (km)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={input.distance}
+                          onChange={(e) => {
+                            const next = [...rankingsInput];
+                            next[idx].distance = e.target.value;
+                            setRankingsInput(next);
+                          }}
+                          className="w-full bg-brand-darkSurface border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-orange"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-black text-sm py-3 rounded-xl transition-all duration-300 shadow-orangeGlow flex items-center justify-center gap-1.5"
+          >
+            <Award className="w-4 h-4" />
+            명예의 전당 도장 정보 저장하기
+          </button>
+        </form>
       )}
     </div>
   );
