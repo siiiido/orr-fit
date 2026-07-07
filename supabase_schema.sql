@@ -59,3 +59,20 @@ INSERT INTO runs (member_id, distance, duration, notes, run_date) VALUES
 ALTER TABLE members ADD COLUMN nickname VARCHAR(10);
 ALTER TABLE runs ADD COLUMN type VARCHAR(20) DEFAULT 'outdoor' NOT NULL;
 ALTER TABLE runs ADD CONSTRAINT check_run_type CHECK (type IN ('treadmill', 'outdoor', 'stairmaster', 'cycling'));
+
+-- 4. Monthly Rankings (Hall of Fame Stamps) Table
+CREATE TABLE monthly_rankings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  member_id UUID REFERENCES members(id) ON DELETE CASCADE NOT NULL,
+  year_month VARCHAR(7) NOT NULL, -- Format: 'YYYY-MM' (e.g. '2026-07')
+  rank INTEGER NOT NULL CHECK (rank >= 1 AND rank <= 6),
+  distance NUMERIC(6,2) NOT NULL CHECK (distance >= 0),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  
+  CONSTRAINT unique_year_month_rank UNIQUE (year_month, rank),
+  CONSTRAINT unique_member_year_month UNIQUE (member_id, year_month)
+);
+
+-- Enable Realtime for monthly_rankings
+alter publication supabase_realtime add table monthly_rankings;
+
