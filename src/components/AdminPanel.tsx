@@ -54,17 +54,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     Array.from({ length: 6 }, () => ({ memberId: '', distance: '' }))
   );
 
+  // useRef to track the last loaded year-month
+  const lastLoadedYearMonthRef = React.useRef<string | null>(null);
+
   // 년-월 선택 시 이미 저장된 데이터가 있으면 폼 로드
   React.useEffect(() => {
-    const currentSaved = monthlyRankings.filter(r => r.year_month === selectedYearMonth);
-    const newInputs = Array.from({ length: 6 }, (_, idx) => {
-      const saved = currentSaved.find(r => r.rank === idx + 1);
-      return {
-        memberId: saved ? saved.member_id : '',
-        distance: saved ? saved.distance.toString() : ''
-      };
-    });
-    setRankingsInput(newInputs);
+    if (selectedYearMonth !== lastLoadedYearMonthRef.current) {
+      const currentSaved = monthlyRankings.filter(r => r.year_month === selectedYearMonth);
+      const newInputs = Array.from({ length: 6 }, (_, idx) => {
+        const saved = currentSaved.find(r => r.rank === idx + 1);
+        return {
+          memberId: saved ? saved.member_id : '',
+          distance: saved ? saved.distance.toString() : ''
+        };
+      });
+      setRankingsInput(newInputs);
+      lastLoadedYearMonthRef.current = selectedYearMonth;
+    }
   }, [selectedYearMonth, monthlyRankings]);
 
   // 자동 계산 기능 함수 구현
@@ -126,6 +132,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
     try {
       await onSaveMonthlyRankings(selectedYearMonth, validRankings);
+      // Reset the ref so that the newly saved records are loaded into the form
+      lastLoadedYearMonthRef.current = null;
       alert(`${selectedYearMonth} 명예의 전당 도장 정보가 저장되었습니다!`);
     } catch (error) {
       console.error('Failed to save rankings:', error);
@@ -734,6 +742,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <label className="block text-[10px] font-bold text-gray-500 mb-1">누적 거리 (km)</label>
                         <input
                           type="number"
+                          min="0"
                           step="0.01"
                           placeholder="0.00"
                           value={input.distance}
