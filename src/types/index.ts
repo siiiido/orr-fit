@@ -13,7 +13,7 @@ export interface Run {
   duration: number; // in seconds
   notes?: string;
   run_date: string;
-  type: 'treadmill' | 'outdoor' | 'stairmaster' | 'cycling';
+  type: 'treadmill' | 'outdoor' | 'stairmaster' | 'cycling' | 'orr_run';
   created_at: string;
 }
 
