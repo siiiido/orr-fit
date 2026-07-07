@@ -42,3 +42,13 @@ export interface ChallengeTier {
 export interface MonthlyChallenge {
   tiers: ChallengeTier[];
 }
+
+export interface MonthlyRanking {
+  id: string;
+  member_id: string;
+  year_month: string; // 'YYYY-MM'
+  rank: number; // 1-6
+  distance: number;
+  created_at: string;
+}
+
