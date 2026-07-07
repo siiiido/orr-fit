@@ -355,6 +355,7 @@ export default function App() {
           runs={runs}
           onClose={() => setSelectedDetailMember(null)}
           monthlyChallenge={monthlyChallenge}
+          rank={leaderboardEntries.findIndex(e => e.memberId === selectedDetailMember.id) + 1}
         />
       )}
 

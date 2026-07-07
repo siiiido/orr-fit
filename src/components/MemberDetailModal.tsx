@@ -7,6 +7,7 @@ interface MemberDetailModalProps {
   runs: Run[];
   onClose: () => void;
   monthlyChallenge: MonthlyChallenge | null;
+  rank: number;
 }
 
 export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
@@ -14,6 +15,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
   runs,
   onClose,
   monthlyChallenge,
+  rank,
 }) => {
   const memberRuns = runs.filter((r) => r.member_id === member.id);
 
@@ -145,6 +147,18 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
 
   const nextTierInfo = getNextTierStatus();
 
+  // Generate personalized motivational message
+  const getMotivationalMessage = () => {
+    if (currentMonthRuns.length === 1) return "첫 인증!! 시작이 반입니다, 조금 더 화이팅이에요! 🔥";
+    if (isMaxTierReached) return "이번 달 최고 목표 달성 완료! 당신의 열정에 박수를 보냅니다 🎉";
+    if (distanceRemaining > 0 && distanceRemaining <= 5) return `다음 목표까지 단 ${distanceRemaining.toFixed(1)}km! 가보자고! 💪`;
+    if (rank === 4 || rank === 5) return `현재 ${rank}위! 순위권(TOP 3) 쟁탈전이 코앞이에요, 조금만 더! 🚀`;
+    if (currentMonthRuns.length >= 5) return `이번 달 벌써 ${currentMonthRuns.length}회나 달렸네요! 꾸준함의 대명사 👍`;
+    return "오늘도 ORR fit과 함께 달려볼까요? 🏃";
+  };
+
+  const motivationalMessage = getMotivationalMessage();
+
 
   return (
     <div
@@ -196,6 +210,11 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Motivational Message Speech Bubble */}
+          <div className="mb-6 relative bg-gradient-to-r from-brand-orange/20 to-orange-500/10 border border-brand-orange/30 p-3 rounded-2xl rounded-tl-sm text-sm text-gray-200 font-semibold shadow-lg">
+            {motivationalMessage}
           </div>
 
           {/* Progress Section */}
