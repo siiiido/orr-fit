@@ -154,7 +154,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
     if (distanceRemaining > 0 && distanceRemaining <= 5) return `다음 목표까지 단 ${distanceRemaining.toFixed(1)}km! 가보자고! 💪`;
     if (rank === 4 || rank === 5) return `현재 ${rank}위! 순위권(TOP 3) 쟁탈전이 코앞이에요, 조금만 더! 🚀`;
     if (currentMonthRuns.length >= 5) return `이번 달 벌써 ${currentMonthRuns.length}회나 달렸네요! 꾸준함의 대명사 👍`;
-    return "오늘도 ORR fit과 함께 달려볼까요? 🏃";
+    return "오늘도 ORR gym과 함께 달려볼까요? 🏃";
   };
 
   const motivationalMessage = getMotivationalMessage();

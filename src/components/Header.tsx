@@ -23,7 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => window.location.reload()}
             title="새로고침"
           >
-            ORR FIT <span className="text-brand-orange">RUNNING</span>
+            ORR GYM <span className="text-brand-orange">RUNNING</span>
           </h1>
           <p className="text-xs text-gray-400 font-semibold hidden md:block">
             멋짐피트니스 연지점 유산소 챌린지
