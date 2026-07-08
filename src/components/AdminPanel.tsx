@@ -278,6 +278,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       setDurationMin('');
       setDurationSec('');
       setRunNotes('');
+      showAlert('알림', '러닝 기록이 성공적으로 등록되었습니다!');
     } catch (error) {
       console.error('Failed to add run:', error);
       showAlert('알림', '러닝 기록 등록에 실패했습니다. 다시 시도해 주세요.');
@@ -292,6 +293,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       await onAddMember(memberName.trim(), memberGender, memberNickname.trim() || undefined);
       setMemberName('');
       setMemberNickname('');
+      showAlert('알림', '신규 회원이 성공적으로 등록되었습니다!');
     } catch (error) {
       console.error('Failed to add member:', error);
       showAlert('알림', '회원 등록에 실패했습니다. 이미 존재하는 이름이거나 입력값을 확인해 주세요.');
@@ -707,6 +709,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       onConfirm: async () => {
                         try {
                           await onDeleteRun(run.id);
+                          showAlert('알림', '러닝 기록이 삭제되었습니다.');
                         } catch (err) {
                           console.error('Delete run error:', err);
                           showAlert('알림', '러닝 기록 삭제에 실패했습니다. 다시 시도해 주세요.');
