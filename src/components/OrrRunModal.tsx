@@ -51,7 +51,7 @@ export const OrrRunModal: React.FC<OrrRunModalProps> = ({ isOpen, onClose, route
           {data.headerSvgPath && (
             <motion.svg
               viewBox={data.headerSvgViewBox || "0 0 300 300"}
-              className="absolute inset-0 w-full h-full p-6"
+              className="absolute inset-0 w-full h-full p-2 scale-110"
               preserveAspectRatio="xMidYMid meet"
               initial="hidden"
               animate="visible"
