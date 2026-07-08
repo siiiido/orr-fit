@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, ShieldAlert, Award, Trophy } from 'lucide-react';
+import { Plus, Trash2, ShieldAlert, Award, Trophy, Calendar } from 'lucide-react';
 import type { Member, Run, ChallengeTier, MonthlyChallenge, MonthlyRanking } from '../types';
 
 interface AdminPanelProps {
@@ -41,8 +41,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onUpdateMemberNickname,
   onSaveMonthlyRankings,
 }) => {
-  // Tab State: 'run' | 'member' | 'settings' | 'history' | 'stamps'
-  const [activeTab, setActiveTab] = useState<'run' | 'member' | 'settings' | 'history' | 'stamps'>('run');
+  // Tab State: 'run' | 'member' | 'settings' | 'history' | 'stamps' | 'event'
+  const [activeTab, setActiveTab] = useState<'run' | 'member' | 'settings' | 'history' | 'stamps' | 'event'>('run');
 
   // stamps 관리용 상태값
   const [selectedYearMonth, setSelectedYearMonth] = useState(() => {
@@ -179,6 +179,43 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     monthlyChallenge?.tiers ?? [{ km: 30, reward_days: 3 }, { km: 50, reward_days: 7 }, { km: 80, reward_days: 14 }]
   );
 
+  // Orr Run Event States
+  const [orrRunSettings, setOrrRunSettings] = useState({
+    date: '',
+    d_day: 7,
+    route_modal_id: '1',
+    enabled: false
+  });
+
+  // Fetch orr run settings
+  React.useEffect(() => {
+    const fetchOrrRunSettings = async () => {
+      import('../lib/supabase').then(async ({ supabase }) => {
+        const { data } = await supabase.from('settings').select('value').eq('key', 'next_orr_run').single();
+        if (data && data.value) {
+          setOrrRunSettings(data.value as any);
+        }
+      });
+    };
+    fetchOrrRunSettings();
+  }, []);
+
+  const handleOrrRunSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    import('../lib/supabase').then(async ({ supabase }) => {
+      const { error } = await supabase.from('settings').upsert({
+        key: 'next_orr_run',
+        value: orrRunSettings
+      });
+      if (error) {
+        console.error('Failed to update orr run settings:', error);
+        alert('이벤트 설정 업데이트에 실패했습니다.');
+      } else {
+        alert('이벤트 설정이 성공적으로 저장되었습니다!');
+      }
+    });
+  };
+
   React.useEffect(() => {
     setTargetDistanceInput(monthlyTarget.toString());
   }, [monthlyTarget]);
@@ -293,6 +330,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           { id: 'settings', label: '목표 설정' },
           { id: 'history', label: '전체 기록 관리' },
           { id: 'stamps', label: '명예의 전당 관리' },
+          { id: 'event', label: '이벤트 관리 (orr run)' },
         ] as const).map((tab) => (
           <button
             key={tab.id}
@@ -766,6 +804,77 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           >
             <Award className="w-4 h-4" />
             명예의 전당 도장 정보 저장하기
+          </button>
+        </form>
+      )}
+
+      {/* Tab: Event Management (orr run) */}
+      {activeTab === 'event' && (
+        <form onSubmit={handleOrrRunSubmit} className="space-y-6">
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">이벤트 활성화 및 노출 설정</h3>
+          
+          <div className="bg-brand-darkBg p-4 rounded-xl border border-gray-800 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-sm font-bold text-white mb-1">이벤트 활성화</label>
+                <p className="text-[10px] text-gray-500">이벤트를 켜면 홈 화면에 플로팅 버튼이 노출될 수 있습니다.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOrrRunSettings({ ...orrRunSettings, enabled: !orrRunSettings.enabled })}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  orrRunSettings.enabled ? 'bg-brand-orange' : 'bg-gray-600'
+                }`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  orrRunSettings.enabled ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-1.5">이벤트 날짜</label>
+              <input
+                type="date"
+                value={orrRunSettings.date}
+                onChange={(e) => setOrrRunSettings({ ...orrRunSettings, date: e.target.value })}
+                className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                required={orrRunSettings.enabled}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-1.5">D-Day 설정 (며칠 전부터 노출할지)</label>
+              <input
+                type="number"
+                min="0"
+                value={orrRunSettings.d_day}
+                onChange={(e) => setOrrRunSettings({ ...orrRunSettings, d_day: Number(e.target.value) })}
+                className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                required={orrRunSettings.enabled}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-400 mb-1.5">사용할 모달 코스 선택</label>
+            <select
+              value={orrRunSettings.route_modal_id}
+              onChange={(e) => setOrrRunSettings({ ...orrRunSettings, route_modal_id: e.target.value })}
+              className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+            >
+              <option value="1">1번 코스 (한강 야간 러닝 코스)</option>
+              <option value="2">2번 코스 (남산 업힐 챌린지)</option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-black text-sm py-3 rounded-xl transition-all duration-300 shadow-orangeGlow flex items-center justify-center gap-1.5"
+          >
+            <Calendar className="w-4 h-4" />
+            이벤트 설정 저장
           </button>
         </form>
       )}

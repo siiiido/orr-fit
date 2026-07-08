@@ -8,6 +8,7 @@ import { AdminGate } from './components/AdminGate';
 import { AdminPanel } from './components/AdminPanel';
 import { MemberDetailModal } from './components/MemberDetailModal';
 import { StampsModal } from './components/StampsModal';
+import { OrrRunBanner } from './components/OrrRunBanner';
 import { supabase } from './lib/supabase';
 import type { LeaderboardEntry, ChallengeTier, Member } from './types';
 
@@ -366,6 +367,9 @@ export default function App() {
         members={members}
         monthlyRankings={monthlyRankings}
       />
+
+      {/* Orr Run Event Banner (Floating Button) */}
+      <OrrRunBanner />
     </div>
   );
 }
