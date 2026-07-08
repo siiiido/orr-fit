@@ -864,8 +864,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               onChange={(e) => setOrrRunSettings({ ...orrRunSettings, route_modal_id: e.target.value })}
               className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
             >
-              <option value="1">1번 코스 (한강 야간 러닝 코스)</option>
-              <option value="2">2번 코스 (남산 업힐 챌린지)</option>
+              <option value="1">1번 코스 (시민공원 러닝 코스)</option>
             </select>
           </div>
 
