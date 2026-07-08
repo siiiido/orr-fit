@@ -47,7 +47,7 @@ export const OrrRunModal: React.FC<OrrRunModalProps> = ({ isOpen, onClose, route
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-md overflow-hidden bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200">
         {/* Header Image Area */}
-        <div className="h-48 bg-neutral-50 border-b border-neutral-200 relative flex items-center justify-center overflow-hidden">
+        <div className="h-36 bg-neutral-50 border-b border-neutral-200 relative flex items-center justify-center overflow-hidden">
           {data.headerSvgPath && (
             <motion.svg
               viewBox={data.headerSvgViewBox || "0 0 300 300"}
@@ -81,7 +81,7 @@ export const OrrRunModal: React.FC<OrrRunModalProps> = ({ isOpen, onClose, route
         </div>
 
         {/* Content Area */}
-        <div className="p-6">
+        <div className="p-5">
           <div className="flex items-center gap-2 mb-2">
             <span className="px-3 py-1 text-xs font-bold text-indigo-700 bg-indigo-100 rounded-full dark:bg-indigo-900/50 dark:text-indigo-300">
               코스 안내
@@ -94,7 +94,7 @@ export const OrrRunModal: React.FC<OrrRunModalProps> = ({ isOpen, onClose, route
           <h3 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
             {data.title}
           </h3>
-          <p className="mb-6 text-gray-600 dark:text-gray-300 leading-relaxed">
+          <p className="mb-4 text-gray-600 dark:text-gray-300 leading-relaxed text-sm">
             {data.description}
           </p>
 
@@ -122,7 +122,7 @@ export const OrrRunModal: React.FC<OrrRunModalProps> = ({ isOpen, onClose, route
 
           <button
             onClick={onClose}
-            className="w-full mt-8 py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-colors shadow-md shadow-orange-500/20"
+            className="w-full mt-5 py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-colors shadow-md shadow-orange-500/20"
           >
             확인했습니다
           </button>
