@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, ShieldAlert, Award, Trophy, Calendar } from 'lucide-react';
 import type { Member, Run, ChallengeTier, MonthlyChallenge, MonthlyRanking } from '../types';
+import { ConfirmModal } from './ConfirmModal';
+import { AlertModal } from './AlertModal';
 
 interface AdminPanelProps {
   members: Member[];
@@ -43,6 +45,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 }) => {
   // Tab State: 'run' | 'member' | 'settings' | 'history' | 'stamps' | 'event'
   const [activeTab, setActiveTab] = useState<'run' | 'member' | 'settings' | 'history' | 'stamps' | 'event'>('run');
+
+  const [confirmConfig, setConfirmConfig] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: () => void }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
+  const [alertConfig, setAlertConfig] = useState<{ isOpen: boolean; title: string; message: string }>({ isOpen: false, title: '', message: '' });
+
+  const showAlert = (title: string, message: string) => {
+    setAlertConfig({ isOpen: true, title, message });
+  };
+
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // stamps 관리용 상태값
   const [selectedYearMonth, setSelectedYearMonth] = useState(() => {
@@ -125,7 +138,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     const memberIds = validRankings.map(r => r.memberId);
     const hasDuplicates = new Set(memberIds).size !== memberIds.length;
     if (hasDuplicates) {
-      alert('순위 내에 동일한 회원이 중복으로 등록되어 있습니다. 확인해 주세요.');
+      showAlert('알림', '순위 내에 동일한 회원이 중복으로 등록되어 있습니다. 확인해 주세요.');
       return;
     }
 
@@ -133,10 +146,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       await onSaveMonthlyRankings(selectedYearMonth, validRankings);
       // Reset the ref so that the newly saved records are loaded into the form
       lastLoadedYearMonthRef.current = null;
-      alert(`${selectedYearMonth} 명예의 전당 도장 정보가 저장되었습니다!`);
+      showAlert('알림', `${selectedYearMonth} 명예의 전당 도장 정보가 저장되었습니다!`);
     } catch (error) {
       console.error('Failed to save rankings:', error);
-      alert('도장 정보 저장에 실패했습니다.');
+      showAlert('알림', '도장 정보 저장에 실패했습니다.');
     }
   };
 
@@ -209,9 +222,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       });
       if (error) {
         console.error('Failed to update orr run settings:', error);
-        alert('이벤트 설정 업데이트에 실패했습니다.');
+        showAlert('알림', '이벤트 설정 업데이트에 실패했습니다.');
       } else {
-        alert('이벤트 설정이 성공적으로 저장되었습니다!');
+        showAlert('알림', '이벤트 설정이 성공적으로 저장되었습니다!');
       }
     });
   };
@@ -267,7 +280,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       setRunNotes('');
     } catch (error) {
       console.error('Failed to add run:', error);
-      alert('러닝 기록 등록에 실패했습니다. 다시 시도해 주세요.');
+      showAlert('알림', '러닝 기록 등록에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
@@ -281,7 +294,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       setMemberNickname('');
     } catch (error) {
       console.error('Failed to add member:', error);
-      alert('회원 등록에 실패했습니다. 이미 존재하는 이름이거나 입력값을 확인해 주세요.');
+      showAlert('알림', '회원 등록에 실패했습니다. 이미 존재하는 이름이거나 입력값을 확인해 주세요.');
     }
   };
 
@@ -290,10 +303,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     e.preventDefault();
     try {
       await onUpdateTarget(Number(targetDistanceInput));
-      alert('목표 거리가 갱신되었습니다!');
+      showAlert('알림', '목표 거리가 갱신되었습니다!');
     } catch (error) {
       console.error('Failed to update target:', error);
-      alert('목표 거리 수정에 실패했습니다.');
+      showAlert('알림', '목표 거리 수정에 실패했습니다.');
     }
   };
 
@@ -302,16 +315,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     e.preventDefault();
     const valid = challengeTiers.every((t) => t.km > 0 && t.reward_days > 0);
     if (!valid) {
-      alert('모든 단계의 km와 보상 일수는 0보다 커야 합니다.');
+      showAlert('알림', '모든 단계의 km와 보상 일수는 0보다 커야 합니다.');
       return;
     }
     const sorted = [...challengeTiers].sort((a, b) => a.km - b.km);
     try {
       await onUpdateChallenge(sorted);
-      alert('월간 챌린지 단계가 업데이트되었습니다!');
+      showAlert('알림', '월간 챌린지 단계가 업데이트되었습니다!');
     } catch (err) {
       console.error('Challenge update error:', err);
-      alert('챌린지 단계 업데이트에 실패했습니다. 다시 시도해 주세요.');
+      showAlert('알림', '챌린지 단계 업데이트에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
@@ -554,10 +567,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         const val = getNicknameVal(m.id, m.nickname).trim();
                         try {
                           await onUpdateMemberNickname(m.id, val || undefined);
-                          alert(`${m.name}님의 닉네임이 수정되었습니다!`);
+                          showAlert('알림', `${m.name}님의 닉네임이 수정되었습니다!`);
                         } catch (err) {
                           console.error('Failed to update nickname:', err);
-                          alert('닉네임 수정에 실패했습니다. 다시 시도해 주세요.');
+                          showAlert('알림', '닉네임 수정에 실패했습니다. 다시 시도해 주세요.');
                         }
                       }}
                       className="px-3 py-1.5 bg-brand-orange hover:bg-brand-orange/90 text-white text-xs font-bold rounded-lg transition-all"
@@ -687,14 +700,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 <button
                   onClick={async () => {
-                    if (window.confirm('이 러닝 활동을 영구히 삭제하시겠습니까?')) {
-                      try {
-                        await onDeleteRun(run.id);
-                      } catch (err) {
-                        console.error('Delete run error:', err);
-                        alert('러닝 기록 삭제에 실패했습니다. 다시 시도해 주세요.');
+                    setConfirmConfig({
+                      isOpen: true,
+                      title: '삭제 확인',
+                      message: '이 러닝 활동을 영구히 삭제하시겠습니까?',
+                      onConfirm: async () => {
+                        try {
+                          await onDeleteRun(run.id);
+                        } catch (err) {
+                          console.error('Delete run error:', err);
+                          showAlert('알림', '러닝 기록 삭제에 실패했습니다. 다시 시도해 주세요.');
+                        }
+                        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
                       }
-                    }
+                    });
                   }}
                   className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                 >
@@ -877,6 +896,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </button>
         </form>
       )}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        onConfirm={confirmConfig.onConfirm}
+        onCancel={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
+      />
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+      />
     </div>
   );
 };
