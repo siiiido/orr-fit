@@ -10,15 +10,21 @@ interface LeaderboardProps {
 
 export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMember, onOpenStamps }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [timeFilter, setTimeFilter] = useState<'month' | 'all'>('month');
 
-  const filteredEntries = entries.filter((entry) => {
+  const sortedEntries = [...entries].sort((a, b) => {
+    if (timeFilter === 'month') return b.currentMonthDistance - a.currentMonthDistance;
+    return b.totalDistance - a.totalDistance;
+  });
+
+  const filteredEntries = sortedEntries.filter((entry) => {
     const search = searchQuery.trim().toLowerCase();
     const matchName = entry.name.toLowerCase().includes(search);
     const matchNick = entry.nickname?.toLowerCase().includes(search) || false;
     return matchName || matchNick;
   });
 
-  const topThree = entries.slice(0, 3);
+  const topThree = sortedEntries.slice(0, 3);
   const podiumArrangement = [
     topThree[1] || null, // 2nd
     topThree[0] || null, // 1st
@@ -101,9 +107,32 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
               <span className="text-[10px] font-black text-brand-gold tracking-widest uppercase">Hall of Fame</span>
             </div>
             <h3 className="text-lg font-black text-white leading-none">
-              이달의 <span className="text-brand-orange">Top 3</span>
+              {timeFilter === 'month' ? '이달의 ' : '명예의 전당 '}
+              <span className="text-brand-orange">Top 3</span>
             </h3>
             <p className="text-[10px] text-gray-600 font-semibold mt-0.5">누적 거리 기준 월간 상위 랭커</p>
+            <div className="flex bg-gray-900 rounded-full p-1 mt-3 w-fit border border-gray-800">
+              <button
+                onClick={() => setTimeFilter('month')}
+                className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${
+                  timeFilter === 'month' 
+                    ? 'bg-gradient-to-r from-brand-orange to-yellow-600 text-white shadow-md' 
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                이번 달
+              </button>
+              <button
+                onClick={() => setTimeFilter('all')}
+                className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${
+                  timeFilter === 'all' 
+                    ? 'bg-gradient-to-r from-brand-orange to-yellow-600 text-white shadow-md' 
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                전체 기간
+              </button>
+            </div>
           </div>
           <button
             onClick={onOpenStamps}
@@ -149,7 +178,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
 
                 {/* ── 거리 ── */}
                 <span className={`text-sm font-black ${rankConfig.distColor} mb-2 block tracking-tight`}>
-                  {entry.totalDistance.toFixed(1)}<span className="text-xs font-bold"> km</span>
+                  {(timeFilter === 'month' ? entry.currentMonthDistance : entry.totalDistance).toFixed(1)}<span className="text-xs font-bold"> km</span>
                 </span>
 
                 {/* ── 포디움 기둥 (순위 번호 + 칭호) ── */}
@@ -202,7 +231,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
             </thead>
             <tbody className="divide-y divide-gray-900">
               {filteredEntries.map((entry) => {
-                const rank = entries.findIndex((e) => e.memberId === entry.memberId) + 1;
+                const rank = sortedEntries.findIndex((e) => e.memberId === entry.memberId) + 1;
                 const isTop3 = rank <= 3;
 
                 let medalColor = '';
@@ -232,7 +261,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
                       </div>
                     </td>
                     <td className="py-3 text-right hidden sm:table-cell">{entry.totalRuns}회</td>
-                    <td className="py-3 text-right text-brand-orange font-black text-sm">{entry.totalDistance.toFixed(1)} km</td>
+                    <td className="py-3 text-right text-brand-orange font-black text-sm">
+                      {(timeFilter === 'month' ? entry.currentMonthDistance : entry.totalDistance).toFixed(1)} km
+                    </td>
                   </tr>
                 );
               })}
