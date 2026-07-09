@@ -38,22 +38,6 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
     return null;
   };
 
-  const renderNameTag = (entry: LeaderboardEntry) => {
-    return (
-      <span className="flex flex-wrap items-center gap-1">
-        {entry.nickname ? (
-          <>
-            <span className="text-brand-orange font-black">{entry.nickname}</span>
-            <span className="text-[10px] text-gray-500 font-normal">({entry.name})</span>
-          </>
-        ) : (
-          <span className="font-bold text-white">{entry.name}</span>
-        )}
-        {getTierMedalEmoji(entry.highestChallengeTier)}
-      </span>
-    );
-  };
-
   // 순위별 칭호·스타일 설정
   const getRankConfig = (isFirst: boolean, isSecond: boolean) => {
     if (isFirst) return {
@@ -255,11 +239,23 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
                       )}
                     </td>
                     <td className="py-3">
-                      <div className="flex items-center gap-1.5 text-left font-bold text-white group-hover/row:underline">
-                        {renderNameTag(entry)}
-                        <span className={`text-[9px] px-1 rounded-md font-extrabold ${entry.gender === 'M' ? 'bg-blue-500/10 text-blue-400' : 'bg-pink-500/10 text-pink-400'}`}>
-                          {entry.gender}
-                        </span>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5 text-left font-bold text-white group-hover/row:underline">
+                        <div className="flex items-center gap-1">
+                          {entry.nickname ? (
+                            <span className="text-brand-orange font-black break-keep">{entry.nickname}</span>
+                          ) : (
+                            <span className="font-bold text-white break-keep">{entry.name}</span>
+                          )}
+                          {getTierMedalEmoji(entry.highestChallengeTier)}
+                        </div>
+                        <div className="flex items-center gap-1 mt-0.5 sm:mt-0">
+                          {entry.nickname && (
+                            <span className="text-[10px] text-gray-500 font-normal whitespace-nowrap">({entry.name})</span>
+                          )}
+                          <span className={`text-[9px] px-1 rounded-md font-extrabold whitespace-nowrap ${entry.gender === 'M' ? 'bg-blue-500/10 text-blue-400' : 'bg-pink-500/10 text-pink-400'}`}>
+                            {entry.gender}
+                          </span>
+                        </div>
                       </div>
                     </td>
                     <td className="py-3 text-right hidden sm:table-cell">{entry.totalRuns}회</td>
