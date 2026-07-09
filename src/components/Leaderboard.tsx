@@ -133,15 +133,15 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
                 >
                   {entry.nickname ? (
                     <div className="w-full min-w-0">
-                      <span className={`text-sm font-black block truncate ${rankConfig.nameColor}`}>
+                      <span className={`text-sm font-black block break-keep leading-tight ${rankConfig.nameColor}`}>
                         {entry.nickname} {medalEmoji}
                       </span>
-                      <span className="text-[10px] text-gray-500 font-semibold block truncate">
+                      <span className="text-[10px] text-gray-500 font-semibold block break-keep">
                         ({entry.name})
                       </span>
                     </div>
                   ) : (
-                    <span className={`text-sm font-black block truncate ${rankConfig.nameColor}`}>
+                    <span className={`text-sm font-black block break-keep leading-tight ${rankConfig.nameColor}`}>
                       {entry.name} {medalEmoji}
                     </span>
                   )}

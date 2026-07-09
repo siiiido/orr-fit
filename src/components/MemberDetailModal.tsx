@@ -194,7 +194,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           <div className="mb-6">
             {member.nickname ? (
               <>
-                <h3 className="text-xl font-black text-brand-orange leading-tight flex items-center gap-1.5">
+                <h3 className="text-xl font-black text-brand-orange leading-tight flex flex-wrap items-center gap-1.5 break-keep">
                   {member.nickname} {highestMedal}
                 </h3>
                 <span className="text-xs text-gray-400 font-bold block mt-1">
@@ -202,7 +202,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
                 </span>
               </>
             ) : (
-              <h3 className="text-xl font-black text-white leading-tight flex items-center gap-1.5">
+              <h3 className="text-xl font-black text-white leading-tight flex flex-wrap items-center gap-1.5 break-keep">
                 {member.name} ({member.gender}) {highestMedal}
               </h3>
             )}
