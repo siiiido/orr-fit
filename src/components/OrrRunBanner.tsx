@@ -8,6 +8,10 @@ interface OrrRunSettings {
   d_day: number;
   route_modal_id: string | number;
   enabled: boolean;
+  distance?: string;
+  description?: string;
+  meeting_point?: string;
+  time?: string;
 }
 
 export const OrrRunBanner: React.FC = () => {
@@ -104,6 +108,7 @@ export const OrrRunBanner: React.FC = () => {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         routeId={settings.route_modal_id}
+        settings={settings}
       />
     </>
   );

@@ -197,7 +197,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     date: '',
     d_day: 7,
     route_modal_id: '1',
-    enabled: false
+    enabled: false,
+    distance: '',
+    description: '',
+    meeting_point: '',
+    time: ''
   });
 
   // Fetch orr run settings
@@ -888,6 +892,56 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             >
               <option value="1">1번 코스 (시민공원 러닝 코스)</option>
             </select>
+          </div>
+
+          <div className="pt-4 border-t border-gray-800 space-y-4">
+            <h4 className="text-xs font-bold text-gray-400">코스 정보 오버라이드 (선택)</h4>
+            <p className="text-[10px] text-gray-500">입력하지 않으면 선택한 코스의 기본 정보가 표시됩니다.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 mb-1.5">목표 거리 (예: 5km)</label>
+                <input
+                  type="text"
+                  value={orrRunSettings.distance || ''}
+                  onChange={(e) => setOrrRunSettings({ ...orrRunSettings, distance: e.target.value })}
+                  placeholder="기본값 사용"
+                  className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 mb-1.5">출발 시간 (예: 오전 10시)</label>
+                <input
+                  type="text"
+                  value={orrRunSettings.time || ''}
+                  onChange={(e) => setOrrRunSettings({ ...orrRunSettings, time: e.target.value })}
+                  placeholder="기본값 사용"
+                  className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-1.5">집결지 안내</label>
+              <input
+                type="text"
+                value={orrRunSettings.meeting_point || ''}
+                onChange={(e) => setOrrRunSettings({ ...orrRunSettings, meeting_point: e.target.value })}
+                placeholder="기본값 사용 (예: 시민공원 남1문 앞)"
+                className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-1.5">코스 설명 문구</label>
+              <textarea
+                value={orrRunSettings.description || ''}
+                onChange={(e) => setOrrRunSettings({ ...orrRunSettings, description: e.target.value })}
+                placeholder="기본값 사용 (예: 시원한 바람맞으며...)"
+                rows={2}
+                className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange resize-none"
+              />
+            </div>
           </div>
 
           <button

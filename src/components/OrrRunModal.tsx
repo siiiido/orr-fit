@@ -6,6 +6,12 @@ interface OrrRunModalProps {
   isOpen: boolean;
   onClose: () => void;
   routeId: number | string;
+  settings?: {
+    distance?: string;
+    description?: string;
+    meeting_point?: string;
+    time?: string;
+  };
 }
 
 const ROUTE_DATA: Record<string, { 
@@ -38,10 +44,17 @@ const ROUTE_DATA: Record<string, {
   },
 };
 
-export const OrrRunModal: React.FC<OrrRunModalProps> = ({ isOpen, onClose, routeId }) => {
+export const OrrRunModal: React.FC<OrrRunModalProps> = ({ isOpen, onClose, routeId, settings }) => {
   if (!isOpen) return null;
 
-  const data = ROUTE_DATA[routeId.toString()] || ROUTE_DATA['1'];
+  const baseData = ROUTE_DATA[routeId.toString()] || ROUTE_DATA['1'];
+  const data = {
+    ...baseData,
+    distance: settings?.distance || baseData.distance,
+    description: settings?.description || baseData.description,
+    meetingPoint: settings?.meeting_point || baseData.meetingPoint,
+    time: settings?.time || baseData.time,
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
