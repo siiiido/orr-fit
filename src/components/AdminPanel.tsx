@@ -549,12 +549,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               members.map((m) => (
                 <div
                   key={m.id}
-                  className="flex justify-between items-center bg-brand-darkBg p-3 rounded-xl border border-gray-800 gap-4"
+                  className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-brand-darkBg p-3 rounded-xl border border-gray-800 gap-3 sm:gap-4"
                 >
                   <div className="text-xs font-bold text-white whitespace-nowrap">
                     {m.name} ({m.gender})
                   </div>
-                  <div className="flex items-center gap-2 flex-1 max-w-[240px]">
+                  <div className="flex items-center gap-2 w-full sm:flex-1 sm:max-w-[240px]">
                     <input
                       type="text"
                       maxLength={6}
