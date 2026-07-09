@@ -793,7 +793,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 type="month"
                 value={selectedYearMonth}
                 onChange={(e) => setSelectedYearMonth(e.target.value)}
-                className="w-full bg-brand-darkSurface border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-orange"
+                className="w-full max-w-full min-w-0 block appearance-none bg-brand-darkSurface border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-orange"
                 required
               />
             </div>
