@@ -86,12 +86,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mb-5 border-b border-gray-900 pb-4">
           <div>
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <Trophy className="w-4 h-4 text-brand-gold" />
-              <span className="text-[10px] font-black text-brand-gold tracking-widest uppercase">Hall of Fame</span>
-            </div>
             <h3 className="text-lg font-black text-white leading-none">
-              {timeFilter === 'month' ? '이달의 ' : '명예의 전당 '}
+              {timeFilter === 'month' ? '이달의 ' : '전체 기간 '}
               <span className="text-brand-orange">Top 3</span>
             </h3>
             <p className="text-[10px] text-gray-600 font-semibold mt-0.5">
