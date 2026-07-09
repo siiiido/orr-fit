@@ -428,7 +428,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             <div>
               <label className="block text-xs font-bold text-gray-400 mb-1.5">운동 시간 (분 / 초)</label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="number"
                   placeholder="분 (Min)"
@@ -836,15 +836,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">이벤트 활성화 및 노출 설정</h3>
           
           <div className="bg-brand-darkBg p-4 rounded-xl border border-gray-800 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-start sm:items-center justify-between gap-4">
               <div>
                 <label className="block text-sm font-bold text-white mb-1">이벤트 활성화</label>
-                <p className="text-[10px] text-gray-500">이벤트를 켜면 홈 화면에 플로팅 버튼이 노출될 수 있습니다.</p>
+                <p className="text-[10px] text-gray-500 break-keep">이벤트를 켜면 홈 화면에 플로팅 버튼이 노출될 수 있습니다.</p>
               </div>
               <button
                 type="button"
                 onClick={() => setOrrRunSettings({ ...orrRunSettings, enabled: !orrRunSettings.enabled })}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
                   orrRunSettings.enabled ? 'bg-brand-orange' : 'bg-gray-600'
                 }`}
               >
