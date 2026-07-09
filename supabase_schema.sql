@@ -58,7 +58,7 @@ INSERT INTO runs (member_id, distance, duration, notes, run_date) VALUES
 -- Migration: Add nickname and workout type columns
 ALTER TABLE members ADD COLUMN nickname VARCHAR(10);
 ALTER TABLE runs ADD COLUMN type VARCHAR(20) DEFAULT 'outdoor' NOT NULL;
-ALTER TABLE runs ADD CONSTRAINT check_run_type CHECK (type IN ('treadmill', 'outdoor', 'stairmaster', 'cycling'));
+ALTER TABLE runs ADD CONSTRAINT check_run_type CHECK (type IN ('treadmill', 'outdoor', 'stairmaster', 'cycling', 'orr_run'));
 
 -- 4. Monthly Rankings (Hall of Fame Stamps) Table
 CREATE TABLE monthly_rankings (

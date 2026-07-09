@@ -19,6 +19,9 @@ interface AdminPanelProps {
     date: string,
     type: 'outdoor' | 'treadmill' | 'stairmaster' | 'cycling'
   ) => Promise<void>;
+  onAddBulkRuns?: (
+    runs: { member_id: string; distance: number; duration: number; run_date: string; type: string }[]
+  ) => Promise<void>;
   onDeleteRun: (runId: string) => Promise<void>;
   onUpdateTarget: (target: number) => Promise<void>;
   onUpdateChallenge: (tiers: ChallengeTier[]) => Promise<void>;
@@ -37,6 +40,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   monthlyRankings,
   onAddMember,
   onAddRun,
+  onAddBulkRuns,
   onDeleteRun,
   onUpdateTarget,
   onUpdateChallenge,
@@ -236,6 +240,53 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   React.useEffect(() => {
     setTargetDistanceInput(monthlyTarget.toString());
   }, [monthlyTarget]);
+
+  // Bulk ORR Run States
+  const [bulkOrrRunDate, setBulkOrrRunDate] = useState(new Date().toISOString().substring(0, 10));
+  const [bulkOrrRunDistance, setBulkOrrRunDistance] = useState('');
+  const [bulkOrrRunDurationMin, setBulkOrrRunDurationMin] = useState('');
+  const [bulkOrrRunDurationSec, setBulkOrrRunDurationSec] = useState('');
+  const [bulkSelectedMembers, setBulkSelectedMembers] = useState<string[]>([]);
+
+  const handleBulkOrrRunSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (bulkSelectedMembers.length === 0) {
+      showAlert('알림', '참여자를 한 명 이상 선택해 주세요.');
+      return;
+    }
+    if (!bulkOrrRunDistance || !bulkOrrRunDurationMin) {
+      showAlert('알림', '거리와 시간을 모두 입력해 주세요.');
+      return;
+    }
+
+    const distanceNum = Number(bulkOrrRunDistance);
+    const totalSeconds = (Number(bulkOrrRunDurationMin) * 60) + Number(bulkOrrRunDurationSec || 0);
+
+    const runsToAdd = bulkSelectedMembers.map(memberId => ({
+      member_id: memberId,
+      distance: distanceNum,
+      duration: totalSeconds,
+      run_date: bulkOrrRunDate,
+      type: 'orr_run',
+      notes: '오르런 단체 기록 일괄 등록'
+    }));
+
+    if (onAddBulkRuns) {
+      try {
+        await onAddBulkRuns(runsToAdd);
+        setBulkSelectedMembers([]);
+        setBulkOrrRunDistance('');
+        setBulkOrrRunDurationMin('');
+        setBulkOrrRunDurationSec('');
+        showAlert('알림', `${runsToAdd.length}명의 오르런 기록이 일괄 등록되었습니다!`);
+      } catch (err) {
+        console.error('Bulk run error:', err);
+        showAlert('알림', '기록 일괄 등록에 실패했습니다.');
+      }
+    } else {
+      showAlert('알림', '일괄 등록 기능이 아직 준비되지 않았습니다.');
+    }
+  };
 
   React.useEffect(() => {
     if (monthlyChallenge?.tiers) {
@@ -836,6 +887,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* Tab: Event Management (orr run) */}
       {activeTab === 'event' && (
+        <>
         <form onSubmit={handleOrrRunSubmit} className="space-y-6">
           <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">이벤트 활성화 및 노출 설정</h3>
           
@@ -952,6 +1004,113 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             이벤트 설정 저장
           </button>
         </form>
+
+        <div className="border-t border-gray-800 my-8" />
+
+        <form onSubmit={handleBulkOrrRunSubmit} className="space-y-6">
+          <div className="flex items-center gap-2">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">오르런 참여자 기록 일괄 등록</h3>
+          </div>
+
+          <div className="bg-brand-darkBg p-4 rounded-xl border border-gray-800 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 mb-1.5">운동 날짜</label>
+                <input
+                  type="date"
+                  value={bulkOrrRunDate}
+                  onChange={(e) => setBulkOrrRunDate(e.target.value)}
+                  className="w-full bg-brand-darkSurface border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 mb-1.5">
+                  오르런 뛴 거리 (km)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="예: 5.0"
+                  value={bulkOrrRunDistance}
+                  onChange={(e) => setBulkOrrRunDistance(e.target.value)}
+                  className="w-full bg-brand-darkSurface border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-1.5">운동 시간 (분 / 초)</label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="number"
+                  placeholder="분 (Min)"
+                  value={bulkOrrRunDurationMin}
+                  onChange={(e) => setBulkOrrRunDurationMin(e.target.value)}
+                  className="flex-1 bg-brand-darkSurface border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                  required
+                />
+                <input
+                  type="number"
+                  placeholder="초 (Sec)"
+                  value={bulkOrrRunDurationSec}
+                  onChange={(e) => setBulkOrrRunDurationSec(e.target.value)}
+                  className="flex-1 bg-brand-darkSurface border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-gray-400">참여자 선택</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (bulkSelectedMembers.length === members.length) {
+                      setBulkSelectedMembers([]);
+                    } else {
+                      setBulkSelectedMembers(members.map(m => m.id));
+                    }
+                  }}
+                  className="text-[10px] font-bold text-brand-orange hover:underline"
+                >
+                  {bulkSelectedMembers.length === members.length ? '전체 해제' : '전체 선택'}
+                </button>
+              </div>
+              <div className="max-h-48 overflow-y-auto bg-brand-darkSurface border border-gray-800 rounded-xl p-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {members.map(m => (
+                  <label key={m.id} className="flex items-center gap-2 p-2 hover:bg-brand-darkBg rounded-lg cursor-pointer transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={bulkSelectedMembers.includes(m.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setBulkSelectedMembers([...bulkSelectedMembers, m.id]);
+                        } else {
+                          setBulkSelectedMembers(bulkSelectedMembers.filter(id => id !== m.id));
+                        }
+                      }}
+                      className="accent-brand-orange w-4 h-4"
+                    />
+                    <span className="text-xs text-white">
+                      {m.nickname ? `${m.nickname} (${m.name})` : m.name}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-black text-sm py-3 rounded-xl transition-all duration-300 shadow-orangeGlow flex items-center justify-center gap-1.5"
+          >
+            <Plus className="w-4 h-4" />
+            {bulkSelectedMembers.length}명 기록 일괄 등록하기
+          </button>
+        </form>
+      </>
       )}
       <ConfirmModal
         isOpen={confirmConfig.isOpen}

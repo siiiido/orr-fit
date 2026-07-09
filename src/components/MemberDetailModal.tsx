@@ -258,8 +258,8 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
             
             <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
               <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Flame className="w-3.5 h-3.5 text-brand-orange" /> ORR RUN</span>
-              <span className="text-lg font-bold text-white">{stats.orr_run.distance.toFixed(1)} km</span>
-              <span className="text-[10px] text-gray-500">{stats.orr_run.count}회</span>
+              <span className="text-lg font-bold text-white">{stats.orr_run.count}회</span>
+              <span className="text-[10px] text-gray-500">총 참여</span>
             </div>
 
             <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">

@@ -137,6 +137,17 @@ export default function App() {
       .throwOnError();
   };
 
+  // Mutator: Add Bulk Runs
+  const handleAddBulkRuns = async (
+    runs: { member_id: string; distance: number; duration: number; run_date: string; type: string }[]
+  ) => {
+    if (runs.length === 0) return;
+    await supabase
+      .from('runs')
+      .insert(runs)
+      .throwOnError();
+  };
+
   // Mutator: Delete Run
   const handleDeleteRun = async (runId: string) => {
     await supabase
@@ -298,6 +309,7 @@ export default function App() {
             monthlyRankings={monthlyRankings}
             onAddMember={handleAddMember}
             onAddRun={handleAddRun}
+            onAddBulkRuns={handleAddBulkRuns}
             onDeleteRun={handleDeleteRun}
             onUpdateTarget={handleUpdateTarget}
             onUpdateChallenge={handleUpdateChallenge}
