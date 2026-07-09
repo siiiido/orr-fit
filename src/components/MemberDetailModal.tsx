@@ -44,6 +44,9 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
   const distanceRemaining = isMaxTierReached ? 0 : Math.max(0, nextTargetKm - currentMonthDistance);
   const progressPercent = nextTargetKm > 0 ? Math.min(100, (currentMonthDistance / nextTargetKm) * 100) : 0;
   
+  // Tab state
+  const [activeTab, setActiveTab] = React.useState<'summary' | 'history'>('summary');
+
   // Animation state
   const [animatedProgress, setAnimatedProgress] = React.useState(0);
   React.useEffect(() => {
@@ -159,6 +162,16 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
 
   const motivationalMessage = getMotivationalMessage();
 
+  const getWorkoutTypeLabel = (type: string) => {
+    switch (type) {
+      case 'treadmill': return '트레드밀';
+      case 'stairmaster': return '천국의계단';
+      case 'cycling': return '싸이클';
+      case 'orr_run': return 'ORR RUN';
+      default: return '야외 러닝';
+    }
+  };
+
 
   return (
     <div
@@ -212,8 +225,29 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
             </div>
           </div>
 
-          {/* Motivational Message Speech Bubble */}
-          <div className="mb-6 relative bg-gradient-to-r from-brand-orange/20 to-orange-500/10 border border-brand-orange/30 p-3 rounded-2xl rounded-tl-sm text-sm text-gray-200 font-semibold shadow-lg">
+          <div className="flex border-b border-gray-800 mb-6">
+            <button
+              className={`flex-1 py-2 text-sm font-bold transition-colors border-b-2 ${
+                activeTab === 'summary' ? 'border-brand-orange text-brand-orange' : 'border-transparent text-gray-500 hover:text-gray-300'
+              }`}
+              onClick={() => setActiveTab('summary')}
+            >
+              요약
+            </button>
+            <button
+              className={`flex-1 py-2 text-sm font-bold transition-colors border-b-2 ${
+                activeTab === 'history' ? 'border-brand-orange text-brand-orange' : 'border-transparent text-gray-500 hover:text-gray-300'
+              }`}
+              onClick={() => setActiveTab('history')}
+            >
+              상세 기록
+            </button>
+          </div>
+
+          {activeTab === 'summary' && (
+            <>
+              {/* Motivational Message Speech Bubble */}
+              <div className="mb-6 relative bg-gradient-to-r from-brand-orange/20 to-orange-500/10 border border-brand-orange/30 p-3 rounded-2xl rounded-tl-sm text-sm text-gray-200 font-semibold shadow-lg">
             {motivationalMessage}
           </div>
 
@@ -288,6 +322,33 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
               </span>
             </div>
           </div>
+            </>
+          )}
+
+          {activeTab === 'history' && (
+            <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+              {memberRuns.sort((a, b) => new Date(b.run_date).getTime() - new Date(a.run_date).getTime()).map(run => (
+                <div key={run.id} className="bg-brand-darkBg/50 p-4 rounded-xl border border-gray-800 flex flex-col gap-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-gray-300">{run.run_date}</span>
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-brand-orange/10 text-brand-orange">
+                      {getWorkoutTypeLabel(run.type)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-white font-bold text-lg">
+                    {(run.type === 'outdoor' || run.type === 'treadmill' || run.type === 'orr_run') && (
+                      <span>{run.distance.toFixed(1)} km</span>
+                    )}
+                    <span className="text-gray-400 text-sm font-semibold">{Math.floor(run.duration / 60)}분 {run.duration % 60}초</span>
+                  </div>
+                  {run.notes && <div className="text-xs text-gray-500 bg-brand-darkSurface p-2 rounded-lg mt-1">{run.notes}</div>}
+                </div>
+              ))}
+              {memberRuns.length === 0 && (
+                <div className="text-center text-gray-500 text-sm py-8 font-semibold">아직 등록된 기록이 없습니다.</div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
