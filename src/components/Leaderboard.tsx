@@ -110,7 +110,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, onSelectMembe
               {timeFilter === 'month' ? '이달의 ' : '명예의 전당 '}
               <span className="text-brand-orange">Top 3</span>
             </h3>
-            <p className="text-[10px] text-gray-600 font-semibold mt-0.5">누적 거리 기준 월간 상위 랭커</p>
+            <p className="text-[10px] text-gray-600 font-semibold mt-0.5">
+              {timeFilter === 'month' ? '누적 거리 기준 월간 상위 랭커' : '누적 거리 기준 전체 상위 랭커'}
+            </p>
             <div className="flex bg-gray-900 rounded-full p-1 mt-3 w-fit border border-gray-800">
               <button
                 onClick={() => setTimeFilter('month')}
