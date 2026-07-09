@@ -58,7 +58,7 @@ export const OrrRunModal: React.FC<OrrRunModalProps> = ({ isOpen, onClose, route
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md overflow-hidden bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-md overflow-hidden bg-white rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200">
         {/* Header Image Area */}
         <div className="h-36 bg-neutral-50 border-b border-neutral-200 relative flex items-center justify-center overflow-hidden">
           {data.headerSvgPath && (
@@ -96,39 +96,39 @@ export const OrrRunModal: React.FC<OrrRunModalProps> = ({ isOpen, onClose, route
         {/* Content Area */}
         <div className="p-5">
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-3 py-1 text-xs font-bold text-indigo-700 bg-indigo-100 rounded-full dark:bg-indigo-900/50 dark:text-indigo-300">
+            <span className="px-3 py-1 text-xs font-bold text-indigo-700 bg-indigo-100 rounded-full">
               코스 안내
             </span>
-            <span className="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-100 rounded-full dark:bg-emerald-900/50 dark:text-emerald-300">
+            <span className="px-3 py-1 text-xs font-bold text-emerald-700 bg-emerald-100 rounded-full">
               {data.distance}
             </span>
           </div>
           
-          <h3 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+          <h3 className="mb-2 text-2xl font-bold text-gray-900">
             {data.title}
           </h3>
-          <p className="mb-4 text-gray-600 dark:text-gray-300 leading-relaxed text-sm">
+          <p className="mb-4 text-gray-600 leading-relaxed text-sm">
             {data.description}
           </p>
 
-          <div className="space-y-4 bg-gray-50 dark:bg-neutral-800/50 p-4 rounded-xl">
-            <div className="flex items-center gap-3 text-neutral-600 dark:text-neutral-300">
-              <div className="p-2 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:bg-orange-900/50 dark:text-orange-400 rounded-lg">
+          <div className="space-y-4 bg-gray-50 p-4 rounded-xl">
+            <div className="flex items-center gap-3 text-neutral-600">
+              <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
                 <MapPin size={20} />
               </div>
               <div>
-                <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">집결지</p>
-                <p className="font-semibold text-neutral-900 dark:text-white">{data.meetingPoint}</p>
+                <p className="text-sm font-medium text-neutral-500">집결지</p>
+                <p className="font-semibold text-neutral-900">{data.meetingPoint}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 text-neutral-600 dark:text-neutral-300">
-              <div className="p-2 bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:bg-sky-900/50 dark:text-sky-400 rounded-lg">
+            <div className="flex items-center gap-3 text-neutral-600">
+              <div className="p-2 bg-sky-100 text-sky-600 rounded-lg">
                 <Clock size={20} />
               </div>
               <div>
-                <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">출발 시간</p>
-                <p className="font-semibold text-neutral-900 dark:text-white">{data.time}</p>
+                <p className="text-sm font-medium text-neutral-500">출발 시간</p>
+                <p className="font-semibold text-neutral-900">{data.time}</p>
               </div>
             </div>
           </div>
