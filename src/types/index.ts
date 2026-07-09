@@ -27,6 +27,7 @@ export interface LeaderboardEntry {
   nickname?: string;
   gender: 'M' | 'F';
   totalDistance: number;
+  currentMonthDistance: number;
   totalRuns: number;
   averagePace: string; // format: MM'SS"
   totalDuration: number; // in seconds

@@ -103,6 +103,7 @@ export default function App() {
         nickname: m.nickname,
         gender: m.gender,
         totalDistance: data.totalDistance,
+        currentMonthDistance: data.currentMonthDistance,
         totalRuns: data.totalRuns,
         averagePace,
         totalDuration: data.totalDuration,
