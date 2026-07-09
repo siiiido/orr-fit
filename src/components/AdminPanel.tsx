@@ -443,7 +443,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 type="date"
                 value={runDate}
                 onChange={(e) => setRunDate(e.target.value)}
-                className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                className="w-full max-w-full min-w-0 block appearance-none bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
                 required
               />
             </div>
@@ -918,7 +918,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 type="date"
                 value={orrRunSettings.date}
                 onChange={(e) => setOrrRunSettings({ ...orrRunSettings, date: e.target.value })}
-                className="w-full bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                className="w-full max-w-full min-w-0 block appearance-none bg-brand-darkBg border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
                 required={orrRunSettings.enabled}
               />
             </div>
@@ -1020,7 +1020,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   type="date"
                   value={bulkOrrRunDate}
                   onChange={(e) => setBulkOrrRunDate(e.target.value)}
-                  className="w-full bg-brand-darkSurface border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                  className="w-full max-w-full min-w-0 block appearance-none bg-brand-darkSurface border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
                   required
                 />
               </div>
