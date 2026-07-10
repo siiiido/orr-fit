@@ -13,7 +13,7 @@ const { Client } = pg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function backupDatabase() {
+export async function backupDatabase() {
   console.log('🚀 Starting local JSON database backup...');
   
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
@@ -21,7 +21,7 @@ async function backupDatabase() {
   
   if (!supabaseUrl || !dbPassword) {
     console.error('❌ Missing VITE_SUPABASE_URL or VITE_SUPABASE_DATABASE_PASSWORD in .env');
-    process.exit(1);
+    return;
   }
 
   // Extract the project ref from the URL
@@ -73,7 +73,7 @@ async function backupDatabase() {
       console.log(`✅ Saved ${data.length} rows to ${table}.json`);
     }
     
-    console.log('🎉 All backups completed successfully!');
+    console.log('🎉 All backups completed successfully!\n');
     
   } catch (err) {
     console.error('❌ Backup failed:', err.message);
@@ -85,4 +85,7 @@ async function backupDatabase() {
   }
 }
 
-backupDatabase();
+// 직접 실행되었을 때만 함수 호출 (npm run backup 용도)
+if (process.argv[1] === __filename) {
+  backupDatabase();
+}
