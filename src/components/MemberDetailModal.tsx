@@ -150,6 +150,17 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
 
   const nextTierInfo = getNextTierStatus();
 
+  // Calculate workout preferences outside of useMemo
+  let preferredWorkout = '';
+  let maxCount = 0;
+  Object.entries(stats).forEach(([key, stat]) => {
+    // NOTE: stats['stairmaster'] doesn't have 'distance', but has 'duration' and 'count'. We use count.
+    if (stat.count > maxCount) {
+      maxCount = stat.count;
+      preferredWorkout = key;
+    }
+  });
+
   // Generate personalized motivational message
   const motivationalMessage = React.useMemo(() => {
     const candidates: string[] = [];
@@ -159,16 +170,6 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
     else if (totalDistance >= 100) candidates.push("와! 총 누적 거리 100km 돌파! 부산에서 경주까지 달려가신 셈이네요 🗺️ 멋짐 최고!");
 
     // B. Workout Preferences
-    let preferredWorkout = '';
-    let maxCount = 0;
-    Object.entries(stats).forEach(([key, stat]) => {
-      // NOTE: stats['stairmaster'] doesn't have 'distance', but has 'duration' and 'count'. We use count.
-      if (stat.count > maxCount) {
-        maxCount = stat.count;
-        preferredWorkout = key;
-      }
-    });
-
     if (maxCount > 0) {
       if (preferredWorkout === 'outdoor') candidates.push("야외 러닝을 가장 좋아하시네요! 오늘도 부산의 시원한 바람맞으며 달려볼까요? 🍃");
       else if (preferredWorkout === 'stairmaster') candidates.push("천국의 계단 마스터! 멋짐에서 독보적인 하체 근력을 뽐내고 계시네요 💪");
@@ -197,7 +198,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
     }
 
     return candidates[Math.floor(Math.random() * candidates.length)];
-  }, [member.id, currentMonthRuns.length, totalDistance, rank, isMaxTierReached, distanceRemaining]);
+  }, [member.id, currentMonthRuns.length, totalDistance, rank, isMaxTierReached, distanceRemaining, preferredWorkout, maxCount]);
 
   const getWorkoutTypeLabel = (type: string) => {
     switch (type) {
