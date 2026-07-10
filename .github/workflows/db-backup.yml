@@ -16,16 +16,24 @@ jobs:
       - name: Install PostgreSQL Client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      - name: Dump Database
+      - name: Dump and Encrypt Database
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
         run: |
           BACKUP_DATE=$(date +'%Y-%m-%d')
+          # 1. 덤프 생성
           pg_dump --clean --if-exists --no-owner --no-privileges --quote-all-identifiers -d "$SUPABASE_DB_URL" -f "orr-fit-db-backup-$BACKUP_DATE.sql"
+          
+          # 2. GPG 암호화
+          gpg --symmetric --batch --yes --passphrase "$BACKUP_ENCRYPTION_PASSWORD" -o "orr-fit-db-backup-$BACKUP_DATE.sql.gpg" "orr-fit-db-backup-$BACKUP_DATE.sql"
+          
+          # 3. 원본 파일 삭제
+          rm "orr-fit-db-backup-$BACKUP_DATE.sql"
 
-      - name: Upload Backup Artifact
+      - name: Upload Encrypted Backup Artifact
         uses: actions/upload-artifact@v4
         with:
           name: orr-fit-db-backup
-          path: orr-fit-db-backup-*.sql
+          path: orr-fit-db-backup-*.sql.gpg
           retention-days: 90
