@@ -53,3 +53,12 @@ export interface MonthlyRanking {
   created_at: string;
 }
 
+export interface HealthPassReward {
+  id: string;
+  member_id: string;
+  year_month: string; // 'YYYY-MM'
+  reward_days: number;
+  distance: number;
+  created_at: string;
+}
+

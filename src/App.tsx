@@ -14,7 +14,7 @@ import { supabase } from './lib/supabase';
 import type { LeaderboardEntry, ChallengeTier, Member } from './types';
 
 export default function App() {
-  const { members, runs, monthlyTarget, monthlyChallenge, monthlyRankings, isLoading } = useDashboardData();
+  const { members, runs, monthlyTarget, monthlyChallenge, monthlyRankings, healthPassRewards, isLoading } = useDashboardData();
   const [isAdmin, setIsAdmin] = useState(false);
   const [showGate, setShowGate] = useState(false);
   const [selectedDetailMember, setSelectedDetailMember] = useState<Member | null>(null);
@@ -206,6 +206,35 @@ export default function App() {
     if (insertError) throw insertError;
   };
 
+  // Mutator: 헬스권 보상 스냅샷 저장
+  const handleSaveHealthPassRewards = async (
+    yearMonth: string,
+    rewards: { memberId: string; rewardDays: number; distance: number }[]
+  ) => {
+    // 기존 스냅샷 삭제 후 upsert
+    const { error: deleteError } = await supabase
+      .from('health_pass_rewards')
+      .delete()
+      .eq('year_month', yearMonth);
+      
+    if (deleteError) throw deleteError;
+
+    if (rewards.length === 0) return;
+
+    const insertData = rewards.map(r => ({
+      member_id: r.memberId,
+      year_month: yearMonth,
+      reward_days: r.rewardDays,
+      distance: r.distance
+    }));
+
+    const { error: insertError } = await supabase
+      .from('health_pass_rewards')
+      .insert(insertData);
+
+    if (insertError) throw insertError;
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-brand-darkBg flex flex-col items-center justify-center gap-8 relative overflow-hidden">
@@ -318,6 +347,7 @@ export default function App() {
             onUpdateChallenge={handleUpdateChallenge}
             onUpdateMemberNickname={handleUpdateMemberNickname}
             onSaveMonthlyRankings={handleSaveMonthlyRankings}
+            onSaveHealthPassRewards={handleSaveHealthPassRewards}
           />
         )}
 
@@ -394,8 +424,7 @@ export default function App() {
       {showHallOfFame && (
         <HallOfFameModal
           members={members}
-          runs={runs}
-          monthlyChallenge={monthlyChallenge}
+          healthPassRewards={healthPassRewards}
           onClose={() => setShowHallOfFame(false)}
         />
       )}

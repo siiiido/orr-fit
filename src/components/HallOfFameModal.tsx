@@ -1,18 +1,16 @@
 import React from 'react';
 import { X, PartyPopper, Ticket } from 'lucide-react';
-import type { Member, Run, MonthlyChallenge } from '../types';
+import type { Member, HealthPassReward } from '../types';
 
 interface HallOfFameModalProps {
   members: Member[];
-  runs: Run[];
-  monthlyChallenge: MonthlyChallenge | null;
+  healthPassRewards: HealthPassReward[];
   onClose: () => void;
 }
 
 export const HallOfFameModal: React.FC<HallOfFameModalProps> = ({
   members,
-  runs,
-  monthlyChallenge,
+  healthPassRewards,
   onClose,
 }) => {
   // Calculate previous month's string
@@ -21,43 +19,20 @@ export const HallOfFameModal: React.FC<HallOfFameModalProps> = ({
   const prevMonthStr = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth() + 1).padStart(2, '0')}`;
   const prevMonthLabel = `${prevMonthDate.getMonth() + 1}월`;
 
-  // Filter runs for the previous month
-  const prevMonthRuns = runs.filter((r) => r.run_date.startsWith(prevMonthStr));
+  // Filter rewards for the previous month
+  const prevMonthRewards = healthPassRewards.filter((r) => r.year_month === prevMonthStr);
   
-  // Calculate distances per member
-  const memberDistances: Record<string, number> = {};
-  prevMonthRuns.forEach((r) => {
-    memberDistances[r.member_id] = (memberDistances[r.member_id] || 0) + r.distance;
-  });
+  // Sort winners by distance
+  const sortedRewards = [...prevMonthRewards].sort((a, b) => b.distance - a.distance);
 
-  // Determine minimum tier for reward
-  const sortedTiers = monthlyChallenge && monthlyChallenge.tiers.length > 0 
-    ? [...monthlyChallenge.tiers].sort((a, b) => a.km - b.km) 
-    : [];
-  const minTierKm = sortedTiers.length > 0 ? sortedTiers[0].km : Infinity;
-
-  const getRewardForDistance = (distance: number) => {
-    let rewardDays = 0;
-    for (const tier of sortedTiers) {
-      if (distance >= tier.km) {
-        rewardDays = tier.reward_days;
-      }
-    }
-    return rewardDays;
-  };
-
-  // Filter and sort winners
-  const winners = members
-    .map((m) => {
-      const dist = memberDistances[m.id] || 0;
-      return {
-        member: m,
-        distance: dist,
-        reward: getRewardForDistance(dist)
-      };
-    })
-    .filter((w) => w.reward > 0)
-    .sort((a, b) => b.distance - a.distance);
+  const winners = sortedRewards.map(r => {
+    const member = members.find(m => m.id === r.member_id);
+    return {
+      member,
+      distance: r.distance,
+      reward: r.reward_days
+    };
+  }).filter(w => w.member !== undefined);
 
   return (
     <div
@@ -88,30 +63,30 @@ export const HallOfFameModal: React.FC<HallOfFameModalProps> = ({
             <p className="text-brand-orange font-bold">
               {prevMonthLabel} 헬스권 달성자
             </p>
-            {sortedTiers.length > 0 && (
+            {winners.length > 0 && (
               <p className="text-xs text-gray-400 mt-1">
-                목표 거리: {minTierKm}km 이상 달성
+                총 {winners.length}명이 헬스권을 달성했습니다!
               </p>
             )}
           </div>
 
           <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
             {winners.length > 0 ? (
-              winners.map((winner) => (
+              winners.map((winner, index) => (
                 <div 
-                  key={winner.member.id} 
+                  key={winner.member?.id || index} 
                   className="flex items-center justify-between p-4 rounded-xl border bg-brand-darkBg/50 border-gray-800"
                 >
                   <div className="flex items-center gap-3">
                     <div>
                       <div className="font-bold text-white text-lg flex items-center gap-2">
-                        {winner.member.nickname || winner.member.name}
+                        {winner.member?.nickname || winner.member?.name}
                         <span className="text-[11px] bg-brand-orange/20 text-brand-orange border border-brand-orange/30 px-2.5 py-0.5 rounded-full font-black tracking-wider flex items-center gap-1">
                           <Ticket className="w-3 h-3" /> {winner.reward}일권
                         </span>
                       </div>
                       <div className="text-xs text-gray-400 font-semibold mt-0.5">
-                        {winner.member.name} ({winner.member.gender})
+                        {winner.member?.name} ({winner.member?.gender})
                       </div>
                     </div>
                   </div>

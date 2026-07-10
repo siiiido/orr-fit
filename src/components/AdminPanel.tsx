@@ -30,6 +30,10 @@ interface AdminPanelProps {
     yearMonth: string,
     rankings: { memberId: string; rank: number; distance: number }[]
   ) => Promise<void>;
+  onSaveHealthPassRewards: (
+    yearMonth: string,
+    rewards: { memberId: string; rewardDays: number; distance: number }[]
+  ) => Promise<void>;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -46,6 +50,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onUpdateChallenge,
   onUpdateMemberNickname,
   onSaveMonthlyRankings,
+  onSaveHealthPassRewards,
 }) => {
   // Tab State: 'run' | 'member' | 'settings' | 'history' | 'stamps' | 'event'
   const [activeTab, setActiveTab] = useState<'run' | 'member' | 'settings' | 'history' | 'stamps' | 'event'>('run');
@@ -154,6 +159,48 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     } catch (error) {
       console.error('Failed to save rankings:', error);
       showAlert('알림', '도장 정보 저장에 실패했습니다.');
+    }
+  };
+
+  // 헬스권 보상 자동 계산 및 저장
+  const handleAutoCalculateAndSaveRewards = async () => {
+    const monthlyRuns = runs.filter(run => run.run_date.startsWith(selectedYearMonth));
+    const memberDistances: Record<string, number> = {};
+    monthlyRuns.forEach(run => {
+      memberDistances[run.member_id] = (memberDistances[run.member_id] || 0) + run.distance;
+    });
+
+    const sortedTiers = monthlyChallenge && monthlyChallenge.tiers.length > 0 
+      ? [...monthlyChallenge.tiers].sort((a, b) => a.km - b.km) 
+      : [];
+
+    const getRewardForDistance = (distance: number) => {
+      let rewardDays = 0;
+      for (const tier of sortedTiers) {
+        if (distance >= tier.km) {
+          rewardDays = tier.reward_days;
+        }
+      }
+      return rewardDays;
+    };
+
+    const winners = members
+      .map(m => {
+        const dist = memberDistances[m.id] || 0;
+        return {
+          memberId: m.id,
+          distance: dist,
+          rewardDays: getRewardForDistance(dist)
+        };
+      })
+      .filter(w => w.rewardDays > 0);
+
+    try {
+      await onSaveHealthPassRewards(selectedYearMonth, winners);
+      showAlert('알림', `${selectedYearMonth} 헬스권 보상 스냅샷이 성공적으로 저장되었습니다!`);
+    } catch (error) {
+      console.error('Failed to save health pass rewards:', error);
+      showAlert('알림', '헬스권 보상 저장에 실패했습니다.');
     }
   };
 
@@ -797,14 +844,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 required
               />
             </div>
-            <div className="flex items-end h-full">
+            <div className="flex flex-col gap-2 h-full justify-end">
+              <button
+                type="button"
+                onClick={handleAutoCalculateAndSaveRewards}
+                className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-bold text-xs px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-orangeGlow"
+              >
+                <Award className="w-3.5 h-3.5" />
+                선택월 헬스권 보상 스냅샷 저장
+              </button>
               <button
                 type="button"
                 onClick={handleAutoCalculate}
-                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-blueGlow"
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-blueGlow"
               >
                 <Trophy className="w-3.5 h-3.5" />
-                이번 달 기록 불러오기 (자동 계산)
+                명예의 전당 (1~6등) 자동 계산
               </button>
             </div>
           </div>

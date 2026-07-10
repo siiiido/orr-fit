@@ -76,3 +76,19 @@ CREATE TABLE monthly_rankings (
 -- Enable Realtime for monthly_rankings
 alter publication supabase_realtime add table monthly_rankings;
 
+
+
+-- 5. Health Pass Rewards Table
+CREATE TABLE health_pass_rewards (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  member_id UUID REFERENCES members(id) ON DELETE CASCADE NOT NULL,
+  year_month VARCHAR(7) NOT NULL, -- Format: 'YYYY-MM'
+  reward_days INTEGER NOT NULL CHECK (reward_days > 0),
+  distance NUMERIC(6,2) NOT NULL CHECK (distance >= 0),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  CONSTRAINT unique_health_pass_member_month UNIQUE (member_id, year_month)
+);
+
+-- Enable Realtime for health_pass_rewards
+alter publication supabase_realtime add table health_pass_rewards;
+
