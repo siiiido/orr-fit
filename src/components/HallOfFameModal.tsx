@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, PartyPopper } from 'lucide-react';
+import { X, PartyPopper, Ticket } from 'lucide-react';
 import type { Member, Run, MonthlyChallenge } from '../types';
 
 interface HallOfFameModalProps {
@@ -19,7 +19,7 @@ export const HallOfFameModal: React.FC<HallOfFameModalProps> = ({
   const now = new Date();
   const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const prevMonthStr = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth() + 1).padStart(2, '0')}`;
-  const prevMonthLabel = `${prevMonthDate.getFullYear()}년 ${prevMonthDate.getMonth() + 1}월`;
+  const prevMonthLabel = `${prevMonthDate.getMonth() + 1}월`;
 
   // Filter runs for the previous month
   const prevMonthRuns = runs.filter((r) => r.run_date.startsWith(prevMonthStr));
@@ -36,21 +36,28 @@ export const HallOfFameModal: React.FC<HallOfFameModalProps> = ({
     : [];
   const minTierKm = sortedTiers.length > 0 ? sortedTiers[0].km : Infinity;
 
+  const getRewardForDistance = (distance: number) => {
+    let rewardDays = 0;
+    for (const tier of sortedTiers) {
+      if (distance >= tier.km) {
+        rewardDays = tier.reward_days;
+      }
+    }
+    return rewardDays;
+  };
+
   // Filter and sort winners
   const winners = members
-    .map((m) => ({
-      member: m,
-      distance: memberDistances[m.id] || 0,
-    }))
-    .filter((w) => w.distance >= minTierKm)
+    .map((m) => {
+      const dist = memberDistances[m.id] || 0;
+      return {
+        member: m,
+        distance: dist,
+        reward: getRewardForDistance(dist)
+      };
+    })
+    .filter((w) => w.reward > 0)
     .sort((a, b) => b.distance - a.distance);
-
-  const getMedalIcon = (index: number) => {
-    if (index === 0) return '🥇';
-    if (index === 1) return '🥈';
-    if (index === 2) return '🥉';
-    return '🏅';
-  };
 
   return (
     <div
@@ -90,23 +97,18 @@ export const HallOfFameModal: React.FC<HallOfFameModalProps> = ({
 
           <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
             {winners.length > 0 ? (
-              winners.map((winner, index) => (
+              winners.map((winner) => (
                 <div 
                   key={winner.member.id} 
-                  className={`flex items-center justify-between p-4 rounded-xl border ${
-                    index < 3 
-                      ? 'bg-gradient-to-r from-brand-orange/10 to-brand-darkBg border-brand-orange/30' 
-                      : 'bg-brand-darkBg/50 border-gray-800'
-                  }`}
+                  className="flex items-center justify-between p-4 rounded-xl border bg-brand-darkBg/50 border-gray-800"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="text-2xl w-8 text-center drop-shadow-md">
-                      {getMedalIcon(index)}
-                    </div>
                     <div>
                       <div className="font-bold text-white text-lg flex items-center gap-2">
                         {winner.member.nickname || winner.member.name}
-                        {index === 0 && <span className="text-[10px] bg-brand-orange text-white px-2 py-0.5 rounded-full font-black tracking-wider uppercase">Top</span>}
+                        <span className="text-[11px] bg-brand-orange/20 text-brand-orange border border-brand-orange/30 px-2.5 py-0.5 rounded-full font-black tracking-wider flex items-center gap-1">
+                          <Ticket className="w-3 h-3" /> {winner.reward}일권
+                        </span>
                       </div>
                       <div className="text-xs text-gray-400 font-semibold mt-0.5">
                         {winner.member.name} ({winner.member.gender})
@@ -114,7 +116,7 @@ export const HallOfFameModal: React.FC<HallOfFameModalProps> = ({
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xl font-black text-brand-orange">
+                    <div className="text-xl font-black text-gray-300">
                       {winner.distance.toFixed(1)}
                     </div>
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">km</div>
