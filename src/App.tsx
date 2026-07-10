@@ -9,6 +9,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { MemberDetailModal } from './components/MemberDetailModal';
 import { StampsModal } from './components/StampsModal';
 import { OrrRunBanner } from './components/OrrRunBanner';
+import { HallOfFameModal } from './components/HallOfFameModal';
 import { supabase } from './lib/supabase';
 import type { LeaderboardEntry, ChallengeTier, Member } from './types';
 
@@ -18,6 +19,7 @@ export default function App() {
   const [showGate, setShowGate] = useState(false);
   const [selectedDetailMember, setSelectedDetailMember] = useState<Member | null>(null);
   const [showStamps, setShowStamps] = useState(false);
+  const [showHallOfFame, setShowHallOfFame] = useState(false);
 
   // Compute Global Metrics
   const totalDistance = runs.reduce((acc, r) => acc + r.distance, 0);
@@ -333,7 +335,14 @@ export default function App() {
           </div>
 
           {/* Column 2: Hall of Fame & Leaderboard (Span 6) */}
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-6 flex flex-col gap-4">
+            <button
+              onClick={() => setShowHallOfFame(true)}
+              className="w-full bg-gradient-to-r from-brand-orange/20 to-orange-500/10 hover:from-brand-orange/30 hover:to-orange-500/20 border border-brand-orange/30 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 group"
+            >
+              <span className="text-xl group-hover:scale-110 transition-transform">🏆</span> 
+              <span>지난달 헬스권 획득자 명예의 전당</span>
+            </button>
             <Leaderboard
               entries={leaderboardEntries}
               onSelectMember={(memberId) => {
@@ -380,6 +389,16 @@ export default function App() {
         members={members}
         monthlyRankings={monthlyRankings}
       />
+
+      {/* Hall of Fame Modal overlay */}
+      {showHallOfFame && (
+        <HallOfFameModal
+          members={members}
+          runs={runs}
+          monthlyChallenge={monthlyChallenge}
+          onClose={() => setShowHallOfFame(false)}
+        />
+      )}
 
       {/* Orr Run Event Banner (Floating Button) */}
       <OrrRunBanner />

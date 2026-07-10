@@ -210,6 +210,25 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
     }
   };
 
+  const getCardClassName = (type: string) => {
+    const isPreferred = preferredWorkout === type && maxCount > 0;
+    const base = "p-3 rounded-xl flex flex-col items-center relative transition-all duration-500";
+    if (isPreferred) {
+      return `${base} bg-gradient-to-b from-brand-orange/20 to-brand-darkBg border-2 border-brand-orange shadow-[0_0_20px_rgba(255,106,0,0.4)] scale-[1.02] z-10 ring-2 ring-brand-orange/50 ring-offset-2 ring-offset-brand-darkSurface animate-[pulse_3s_ease-in-out_infinite]`;
+    }
+    return `${base} bg-brand-darkBg border border-gray-800`;
+  };
+
+  const renderBadge = (type: string) => {
+    if (preferredWorkout === type && maxCount > 0) {
+      return (
+        <span className="absolute -top-2 -right-2 bg-brand-orange text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg border border-brand-darkSurface animate-bounce">
+          BEST 🔥
+        </span>
+      );
+    }
+    return null;
+  };
 
   return (
     <div
@@ -322,25 +341,29 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
 
           {/* Activity Grid */}
           <div className="mt-6 grid grid-cols-2 gap-3 mb-6">
-            <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
+            <div className={getCardClassName('outdoor')}>
+              {renderBadge('outdoor')}
               <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Footprints className="w-3.5 h-3.5 text-brand-orange" /> 야외 러닝</span>
               <span className="text-lg font-bold text-white">{stats.outdoor.distance.toFixed(1)} km</span>
               <span className="text-[10px] text-gray-500">{stats.outdoor.count}회</span>
             </div>
             
-            <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
+            <div className={getCardClassName('orr_run')}>
+              {renderBadge('orr_run')}
               <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Flame className="w-3.5 h-3.5 text-brand-orange" /> ORR RUN</span>
               <span className="text-lg font-bold text-white">{stats.orr_run.count}회</span>
               <span className="text-[10px] text-gray-500">총 참여</span>
             </div>
 
-            <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
+            <div className={getCardClassName('treadmill')}>
+              {renderBadge('treadmill')}
               <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Activity className="w-3.5 h-3.5 text-brand-orange" /> 트레드밀</span>
               <span className="text-lg font-bold text-white">{stats.treadmill.distance.toFixed(1)} km</span>
               <span className="text-[10px] text-gray-500">{stats.treadmill.count}회</span>
             </div>
 
-            <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
+            <div className={getCardClassName('stairmaster')}>
+              {renderBadge('stairmaster')}
               <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Dumbbell className="w-3.5 h-3.5 text-brand-orange" /> 천국의 계단</span>
               <span className="text-lg font-bold text-white">
                 {Math.floor(stats.stairmaster.duration / 60)} 분
@@ -350,7 +373,8 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
               </span>
             </div>
 
-            <div className="bg-brand-darkBg p-3 rounded-xl border border-gray-800 flex flex-col items-center">
+            <div className={getCardClassName('cycling')}>
+              {renderBadge('cycling')}
               <span className="text-xs text-gray-400 mb-2 flex items-center gap-1"><Bike className="w-3.5 h-3.5 text-brand-orange" /> 실내 사이클</span>
               <span className="text-lg font-bold text-white">
                 {Math.floor(stats.cycling.duration / 60)} 분
