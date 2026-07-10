@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Trophy, Medal } from 'lucide-react';
+import { X, PartyPopper } from 'lucide-react';
 import type { Member, Run, MonthlyChallenge } from '../types';
 
 interface HallOfFameModalProps {
@@ -75,11 +75,11 @@ export const HallOfFameModal: React.FC<HallOfFameModalProps> = ({
         <div className="p-6 relative z-10">
           <div className="text-center mb-8 mt-2">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-orange/10 mb-4 border border-brand-orange/20 shadow-[0_0_15px_rgba(255,107,0,0.2)]">
-              <Trophy className="w-8 h-8 text-brand-orange" />
+              <PartyPopper className="w-8 h-8 text-brand-orange" />
             </div>
-            <h2 className="text-2xl font-black text-white mb-2">명예의 전당</h2>
+            <h2 className="text-2xl font-black text-white mb-2">축하합니다!</h2>
             <p className="text-brand-orange font-bold">
-              {prevMonthLabel} 헬스권 획득자
+              {prevMonthLabel} 헬스권 달성자
             </p>
             {sortedTiers.length > 0 && (
               <p className="text-xs text-gray-400 mt-1">
@@ -123,9 +123,9 @@ export const HallOfFameModal: React.FC<HallOfFameModalProps> = ({
               ))
             ) : (
               <div className="text-center py-10 bg-brand-darkBg/30 rounded-xl border border-gray-800 border-dashed">
-                <Medal className="w-10 h-10 text-gray-600 mx-auto mb-3 opacity-50" />
+                <PartyPopper className="w-10 h-10 text-gray-600 mx-auto mb-3 opacity-50" />
                 <p className="text-gray-400 font-bold mb-1">저번달에는 달성자가 없었어요.</p>
-                <p className="text-gray-500 text-sm">이번 달 명예의 전당 주인공이 되어보세요!</p>
+                <p className="text-gray-500 text-sm">이번 달엔 꼭 목표를 달성해 보세요!</p>
               </div>
             )}
           </div>

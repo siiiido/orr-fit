@@ -340,8 +340,8 @@ export default function App() {
               onClick={() => setShowHallOfFame(true)}
               className="w-full bg-gradient-to-r from-brand-orange/20 to-orange-500/10 hover:from-brand-orange/30 hover:to-orange-500/20 border border-brand-orange/30 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 group"
             >
-              <span className="text-xl group-hover:scale-110 transition-transform">🏆</span> 
-              <span>지난달 헬스권 획득자</span>
+              <span className="text-xl group-hover:scale-110 transition-transform">🎉</span> 
+              <span>저번달 헬스권 획득을 축하합니다!</span>
             </button>
             <Leaderboard
               entries={leaderboardEntries}
