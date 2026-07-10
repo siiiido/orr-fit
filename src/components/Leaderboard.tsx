@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Trophy, Medal } from 'lucide-react';
+import { Search, Medal } from 'lucide-react';
 import type { LeaderboardEntry } from '../types';
 
 interface LeaderboardProps {
