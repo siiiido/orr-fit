@@ -75,23 +75,23 @@ export const HallOfFameModal: React.FC<HallOfFameModalProps> = ({
               winners.map((winner, index) => (
                 <div 
                   key={winner.member?.id || index} 
-                  className="flex items-center justify-between p-4 rounded-xl border bg-brand-darkBg/50 border-gray-800"
+                  className="flex items-center justify-between p-4 rounded-xl border bg-brand-darkBg/50 border-gray-800 gap-2"
                 >
-                  <div className="flex items-center gap-3">
-                    <div>
-                      <div className="font-bold text-white text-lg flex items-center gap-2">
-                        {winner.member?.nickname || winner.member?.name}
-                        <span className="text-[11px] bg-brand-orange/20 text-brand-orange border border-brand-orange/30 px-2.5 py-0.5 rounded-full font-black tracking-wider flex items-center gap-1">
-                          <Ticket className="w-3 h-3" /> {winner.reward}일권
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="min-w-0">
+                      <div className="font-bold text-white text-base sm:text-lg flex flex-wrap sm:flex-nowrap items-center gap-1.5 sm:gap-2">
+                        <span className="truncate">{winner.member?.nickname || winner.member?.name}</span>
+                        <span className="shrink-0 text-[10px] sm:text-[11px] bg-brand-orange/20 text-brand-orange border border-brand-orange/30 px-2 sm:px-2.5 py-0.5 rounded-full font-black tracking-wider flex items-center gap-1">
+                          <Ticket className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {winner.reward}일권
                         </span>
                       </div>
-                      <div className="text-xs text-gray-400 font-semibold mt-0.5">
+                      <div className="text-xs text-gray-400 font-semibold mt-0.5 truncate">
                         {winner.member?.name} ({winner.member?.gender})
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-xl font-black text-gray-300">
+                  <div className="text-right shrink-0">
+                    <div className="text-lg sm:text-xl font-black text-gray-300">
                       {winner.distance.toFixed(1)}
                     </div>
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">km</div>

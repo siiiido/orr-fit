@@ -776,6 +776,39 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               챌린지 업데이트
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="border-t border-gray-800" />
+
+          {/* Health Pass Snapshot Setting */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">헬스권 보상 스냅샷 저장</h3>
+            <p className="text-[11px] text-gray-500">
+              ※ 현재 설정된 챌린지 단계와 선택한 월의 기록을 기반으로 달성자를 계산하여 영구 저장합니다.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 bg-brand-darkBg p-4 rounded-xl border border-gray-800">
+              <div className="flex-1">
+                <label className="block text-xs font-bold text-gray-400 mb-1.5">대상 년/월 선택</label>
+                <input
+                  type="month"
+                  value={selectedYearMonth}
+                  onChange={(e) => setSelectedYearMonth(e.target.value)}
+                  className="w-full max-w-full min-w-0 block appearance-none bg-brand-darkSurface border border-gray-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-orange"
+                  required
+                />
+              </div>
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={handleAutoCalculateAndSaveRewards}
+                  className="w-full sm:w-auto bg-brand-orange hover:bg-brand-orange/90 text-white font-bold text-xs px-6 py-3 rounded-xl transition-all duration-300 shadow-orangeGlow flex items-center justify-center gap-1.5"
+                >
+                  <Award className="w-4 h-4" />
+                  스냅샷 저장하기
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -844,19 +877,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 required
               />
             </div>
-            <div className="flex flex-col gap-2 h-full justify-end">
-              <button
-                type="button"
-                onClick={handleAutoCalculateAndSaveRewards}
-                className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-bold text-xs px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-orangeGlow"
-              >
-                <Award className="w-3.5 h-3.5" />
-                선택월 헬스권 보상 스냅샷 저장
-              </button>
+            <div className="flex items-end h-full">
               <button
                 type="button"
                 onClick={handleAutoCalculate}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-blueGlow"
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-blueGlow"
               >
                 <Trophy className="w-3.5 h-3.5" />
                 명예의 전당 (1~6등) 자동 계산
