@@ -48,7 +48,7 @@ export const HallOfFameModal: React.FC<HallOfFameModalProps> = ({
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-10"
+          className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-20"
           aria-label="닫기"
         >
           <X className="w-5 h-5" />
